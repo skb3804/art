@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>그림당근 - 개인간 미술품 직거래/택배 거래 장터</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        carrot: {
+                            50: '#fff7ed',
+                            100: '#ffedd5',
+                            500: '#ff6f0f', // Signature Carrot Orange
+                            600: '#ea580c',
+                            700: '#c2410c',
+                        },
+                        studio: {
+                            50: '#fafaf9',
+                            100: '#f5f5f4',
+                            200: '#e7e5e4',
+                            800: '#292524',
+                            900: '#1c1917',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Pretendard', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'Roboto', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom Scrollbar & Utilities */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-studio-50 text-studio-900 font-sans min-h-screen flex flex-col pb-16 md:pb-0">
+
+    <!-- Header / Navbar -->
+    <header class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+            <!-- Brand Logo -->
+            <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('all')">
+                <div class="bg-carrot-500 text-white p-2 rounded-2xl flex items-center justify-center shadow-md shadow-carrot-500/20">
+                    <i data-lucide="palette" class="w-6 h-6"></i>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-xl font-bold tracking-tight text-studio-900 flex items-center gap-1">
+                        그림당근 <span class="text-xs bg-carrot-100 text-carrot-600 px-2 py-0.5 rounded-full font-medium">C2C</span>
+                    </span>
+                    <span class="text-[11px] font-semibold text-carrot-600 -mt-1 tracking-wide">Art Carrot</span>
+                    <span class="text-[11px] text-gray-500 -mt-0.5 hidden sm:inline">개인 그림 직거래</span>
+                </div>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="flex-1 max-w-md relative hidden md:block">
+                <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                <input type="text" id="searchInput" oninput="handleSearch()" placeholder="작품명, 작가명, 지역(예: 마포구, 해운대) 검색" 
+                       class="w-full pl-9 pr-4 py-2 bg-gray-100 focus:bg-white text-sm rounded-full border border-transparent focus:border-carrot-500 outline-none transition">
+            </div>
+
+            <!-- Right Actions -->
+            <div class="flex items-center gap-2 sm:gap-3">
+                <button onclick="openChatModal()" class="relative p-2 text-gray-600 hover:text-carrot-500 hover:bg-carrot-50 rounded-full transition" title="1:1 채팅">
+                    <i data-lucide="message-circle" class="w-6 h-6"></i>
+                    <span class="absolute top-1 right-1 w-2.5 h-2.5 bg-carrot-500 rounded-full border-2 border-white"></span>
+                </button>
+                <button onclick="openUploadModal()" class="bg-carrot-500 hover:bg-carrot-600 text-white text-sm font-semibold px-4 py-2 rounded-xl shadow-sm transition flex items-center gap-1.5">
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                    <span class="hidden sm:inline">작품 등록하기</span>
+                    <span class="sm:hidden">등록</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Search Bar -->
+        <div class="px-4 pb-3 md:hidden">
+            <div class="relative w-full">
+                <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                <input type="text" id="searchInputMobile" oninput="handleSearchMobile()" placeholder="작품명, 작가, 지역 검색..." 
+                       class="w-full pl-9 pr-4 py-2 bg-gray-100 text-sm rounded-full border border-transparent focus:border-carrot-500 outline-none">
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs & Category Filters Bar -->
+    <nav class="bg-white border-b border-gray-200 sticky top-16 md:top-16 z-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Feed Tabs -->
+            <div class="flex gap-6 border-b border-gray-100 text-sm font-medium overflow-x-auto hide-scrollbar">
+                <button id="tab-all" onclick="switchTab('all')" class="py-3 border-b-2 border-carrot-500 text-carrot-600 font-bold whitespace-nowrap flex items-center gap-1.5">
+                    <i data-lucide="grid" class="w-4 h-4"></i> 전체 작품
+                </button>
+                <button id="tab-artist" onclick="switchTab('artist')" class="py-3 border-b-2 border-transparent text-gray-500 hover:text-studio-900 whitespace-nowrap flex items-center gap-1.5">
+                    <i data-lucide="users" class="w-4 h-4 text-purple-500"></i> 작가 모아보기
+                </button>
+                <button id="tab-video" onclick="switchTab('video')" class="py-3 border-b-2 border-transparent text-gray-500 hover:text-studio-900 whitespace-nowrap flex items-center gap-1.5">
+                    <i data-lucide="clapperboard" class="w-4 h-4 text-rose-500"></i> 🎬 작업영상 모음
+                </button>
+                <button id="tab-fav" onclick="switchTab('fav')" class="py-3 border-b-2 border-transparent text-gray-500 hover:text-studio-900 whitespace-nowrap flex items-center gap-1.5">
+                    <i data-lucide="heart" class="w-4 h-4 text-red-500"></i> 찜한 작품 (<span id="fav-count">0</span>)
+                </button>
+                <button id="tab-my" onclick="switchTab('my')" class="py-3 border-b-2 border-transparent text-gray-500 hover:text-studio-900 whitespace-nowrap flex items-center gap-1.5">
+                    <i data-lucide="user" class="w-4 h-4"></i> 내 판매내역
+                </button>
+            </div>
+
+            <!-- Filter Badges / Tags Bar -->
+            <div id="filterBar" class="py-3 flex items-center gap-2 overflow-x-auto hide-scrollbar text-xs">
+                <!-- Trade Type Filter -->
+                <div class="flex items-center gap-1 bg-gray-100 p-1 rounded-lg">
+                    <button onclick="setTradeFilter('ALL')" id="filter-trade-ALL" class="px-2.5 py-1 rounded-md bg-white shadow-xs font-semibold text-studio-900">전체</button>
+                    <button onclick="setTradeFilter('DIRECT')" id="filter-trade-DIRECT" class="px-2.5 py-1 rounded-md text-gray-600 hover:text-studio-900">🤝 직거래</button>
+                    <button onclick="setTradeFilter('PARCEL')" id="filter-trade-PARCEL" class="px-2.5 py-1 rounded-md text-gray-600 hover:text-studio-900">📦 택배</button>
+                </div>
+
+                <div class="h-4 w-[1px] bg-gray-300 mx-1"></div>
+
+                <!-- Medium Filter Tags -->
+                <div class="flex gap-1.5" id="medium-filters">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-10">
+        <!-- Banner Notice -->
+        <div class="bg-gradient-to-r from-carrot-50 to-orange-100 border border-carrot-200/60 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
+            <div class="flex items-center gap-3">
+                <div class="p-2.5 bg-carrot-500/10 text-carrot-600 rounded-xl font-bold">
+                    🎨
+                </div>
+                <div>
+                    <h3 class="text-sm font-bold text-studio-900">그림당근은 개인 간 자율 거래 서비스입니다</h3>
+                    <p class="text-xs text-gray-600">결제 수수료 없이 작가와 구매자가 직접 소통하여 직거래 또는 택배로 작품을 전달해보세요!</p>
+                </div>
+            </div>
+            <a href="#safety-guide" onclick="scrollToSafety()" class="text-xs text-carrot-600 font-semibold hover:underline flex items-center gap-1 whitespace-nowrap">
+                거래 안전 가이드 <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+            </a>
+        </div>
+
+        <!-- Section 1: Artwork Grid Section -->
+        <section id="artworkSection">
+            <div class="flex items-center justify-between mb-4">
+                <h2 id="artworkSectionTitle" class="text-lg font-bold text-studio-900 flex items-center gap-2">
+                    <i data-lucide="palette" class="w-5 h-5 text-carrot-500"></i> 등록된 작품
+                </h2>
+                <span id="artworkCountBadge" class="text-xs text-gray-500 font-medium"></span>
+            </div>
+            
+            <div id="artworkGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+                <!-- Dynamic Artwork Cards populate here -->
+            </div>
+        </section>
+
+        <!-- Section 2: Registered Artists Section (Visible on Initial Screen / Home View) -->
+        <section id="artistSection" class="pt-6 border-t border-gray-200">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h2 class="text-lg font-bold text-studio-900 flex items-center gap-2">
+                        <i data-lucide="users" class="w-5 h-5 text-purple-500"></i> 등록된 작가 리스트
+                    </h2>
+                    <p class="text-xs text-gray-500 mt-0.5">내 동네 및 전국에서 활동 중인 독창적인 개인 작가님들을 만나보세요.</p>
+                </div>
+            </div>
+
+            <div id="artistGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Dynamic Artist Cards populate here -->
+            </div>
+        </section>
+
+        <!-- Empty State View -->
+        <div id="emptyState" class="hidden flex-col items-center justify-center py-20 text-center">
+            <div class="w-16 h-16 bg-gray-100 text-gray-400 rounded-full flex items-center justify-center mb-3">
+                <i data-lucide="image-off" class="w-8 h-8"></i>
+            </div>
+            <h3 class="text-lg font-bold text-gray-700">해당하는 목록이 없습니다</h3>
+            <p class="text-sm text-gray-500 mt-1">다른 검색어나 필터를 선택해보세요.</p>
+            <button onclick="resetFilters()" class="mt-4 px-4 py-2 bg-gray-200 text-xs font-semibold text-gray-700 rounded-lg hover:bg-gray-300 transition">
+                필터 초기화
+            </button>
+        </div>
+    </main>
+
+    <!-- Mobile Bottom Navigation Bar -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40 px-2 py-1.5 flex items-center justify-around shadow-lg">
+        <button onclick="switchTab('all')" id="bottom-nav-all" class="flex flex-col items-center gap-0.5 text-carrot-600 font-bold p-1">
+            <i data-lucide="grid" class="w-5 h-5"></i>
+            <span class="text-[10px]">홈</span>
+        </button>
+        <button onclick="switchTab('artist')" id="bottom-nav-artist" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-studio-900 p-1">
+            <i data-lucide="users" class="w-5 h-5"></i>
+            <span class="text-[10px]">작가</span>
+        </button>
+        <button onclick="switchTab('video')" id="bottom-nav-video" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-studio-900 p-1">
+            <i data-lucide="clapperboard" class="w-5 h-5"></i>
+            <span class="text-[10px]">작업영상</span>
+        </button>
+        <button onclick="openChatModal()" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-studio-900 p-1 relative">
+            <i data-lucide="message-circle" class="w-5 h-5"></i>
+            <span class="absolute top-1 right-2 w-2 h-2 bg-carrot-500 rounded-full"></span>
+            <span class="text-[10px]">채팅</span>
+        </button>
+        <button onclick="switchTab('my')" id="bottom-nav-my" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-studio-900 p-1">
+            <i data-lucide="user" class="w-5 h-5"></i>
+            <span class="text-[10px]">MY</span>
+        </button>
+    </nav>
+
+    <!-- Footer -->
+    <footer id="safety-guide" class="bg-white border-t border-gray-200 mt-12 py-8 text-gray-500 text-xs">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div>
+                    <div class="flex items-center gap-2 font-bold text-studio-900 text-sm mb-2">
+                        <span class="text-carrot-500">🎨 그림당근</span> (Art Carrot)
+                    </div>
+                    <p class="leading-relaxed">개인 작가와 그림 사랑꾼을 잇는 개인 그림 직거래 마켓. 작품의 작업 영상부터 실물 감상까지 손쉽게 경험해보세요.</p>
+                </div>
+                <div>
+                    <h4 class="font-bold text-studio-900 text-sm mb-2">🤝 개인간 거래 안전 수칙</h4>
+                    <ul class="space-y-1 text-gray-600">
+                        <li>• 직거래 시 가급적 밝은 공공장소에서 실물을 확인하세요.</li>
+                        <li>• 택배 거래 시 모서리 완충 포장(에어캡)을 사전에 상호 협의하세요.</li>
+                        <li>• 선금 이체 시 계좌 명의 및 안전 수칙을 준수하세요.</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-studio-900 text-sm mb-2">서비스 안내</h4>
+                    <p class="leading-relaxed text-gray-600">
+                        그림당근은 개인 간 자율 거래를 중개하는 장터로, 배송 중 파손 및 거래 관련 분쟁에 관여하거나 중재/보상책임을 지지 않습니다.
+                    </p>
+                </div>
+            </div>
+            <div class="border-t border-gray-100 pt-4 text-center text-gray-400">
+                &copy; 2026 그림당근 Art Carrot. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- ==================== MODALS ==================== -->
+
+    <!-- 1. Artwork Detail Modal -->
+    <div id="detailModal" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
+        <div class="bg-white rounded-2xl max-w-3xl w-full max-h-[92vh] overflow-y-auto shadow-2xl relative flex flex-col my-auto">
+            <!-- Close Button -->
+            <button onclick="closeModal('detailModal')" class="absolute top-4 right-4 z-20 p-2 bg-black/50 text-white hover:bg-black/70 rounded-full transition shadow-lg">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+
+            <!-- Media Section Container -->
+            <div class="bg-studio-900 w-full flex flex-col items-center justify-center p-4 gap-4 divide-y divide-gray-800">
+                <!-- 1-A. Main Image Container (Full View without cropping) -->
+                <div class="w-full flex flex-col items-center justify-center relative min-h-[260px] max-h-[460px]">
+                    <img id="detailImage" src="" class="max-w-full max-h-[460px] object-contain rounded-md shadow-2xl cursor-zoom-in hover:scale-[1.01] transition" onclick="openFullImageViewer(this.src)">
+                    <span class="mt-2 text-[11px] text-gray-400 flex items-center gap-1">
+                        <i data-lucide="maximize-2" class="w-3 h-3"></i> 이미지를 클릭하면 전체 화면으로 크게 볼 수 있습니다
+                    </span>
+                </div>
+
+                <!-- 1-B. Process Video Container (Auto-played underneath if available) -->
+                <div id="detailVideoContainer" class="w-full pt-4 hidden flex-col items-center">
+                    <div class="w-full max-w-lg bg-black rounded-xl overflow-hidden shadow-lg border border-gray-800">
+                        <div class="px-3 py-1.5 bg-gray-900 border-b border-gray-800 text-white text-xs font-bold flex items-center gap-1.5">
+                            <i data-lucide="clapperboard" class="w-4 h-4 text-rose-500"></i>
+                            <span>작가 작업 과정 영상 (자동 재생 중)</span>
+                        </div>
+                        <video id="detailVideoPlayer" controls autoplay muted loop playsinline class="w-full max-h-[300px] bg-black">
+                            <source id="detailVideoSource" src="" type="video/mp4">
+                            작업 영상을 재생할 수 없습니다.
+                        </video>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detail Content -->
+            <div class="p-5 sm:p-6 space-y-5">
+                <!-- Artist Info Snippet -->
+                <div class="flex items-center justify-between pb-4 border-b border-gray-100">
+                    <div class="flex items-center gap-3">
+                        <img id="detailArtistAvatar" src="" class="w-12 h-12 rounded-full object-cover border border-gray-200">
+                        <div>
+                            <div class="flex items-center gap-1.5">
+                                <h4 id="detailArtistName" class="font-bold text-studio-900 text-base"></h4>
+                                <span class="bg-orange-100 text-carrot-700 text-[10px] px-1.5 py-0.5 rounded font-medium">작가</span>
+                            </div>
+                            <p id="detailRegion" class="text-xs text-gray-500 flex items-center gap-0.5 mt-0.5">
+                                <i data-lucide="map-pin" class="w-3 h-3 text-gray-400"></i> <span id="detailRegionText"></span>
+                            </p>
+                        </div>
+                    </div>
+                    <!-- Trade Type Badge -->
+                    <div id="detailTradeBadge" class="text-xs px-2.5 py-1 rounded-lg font-medium bg-gray-100 text-gray-700"></div>
+                </div>
+
+                <!-- Main Info -->
+                <div>
+                    <div class="flex items-start justify-between gap-4">
+                        <h2 id="detailTitle" class="text-xl sm:text-2xl font-bold text-studio-900 leading-snug"></h2>
+                        <button id="detailFavBtn" onclick="toggleCurrentDetailFav()" class="p-2 border border-gray-200 rounded-xl hover:bg-gray-50 text-gray-400 transition">
+                            <i data-lucide="heart" class="w-6 h-6"></i>
+                        </button>
+                    </div>
+                    <div class="mt-2 flex items-baseline gap-2">
+                        <span id="detailPrice" class="text-2xl font-extrabold text-carrot-600"></span>
+                        <span id="detailNegotiable" class="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded">가격제안 가능</span>
+                    </div>
+                </div>
+
+                <!-- Spec Grid Box -->
+                <div class="bg-studio-50 rounded-xl p-4 grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
+                    <div>
+                        <span class="text-gray-400 block mb-0.5">재료 / 기법</span>
+                        <span id="detailMedium" class="font-semibold text-studio-800"></span>
+                    </div>
+                    <div>
+                        <span class="text-gray-400 block mb-0.5">작품 크기</span>
+                        <span id="detailSize" class="font-semibold text-studio-800"></span>
+                    </div>
+                    <div>
+                        <span class="text-gray-400 block mb-0.5">액자 유무</span>
+                        <span id="detailFrame" class="font-semibold text-studio-800"></span>
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div>
+                    <h4 class="text-sm font-bold text-studio-900 mb-1.5">작품 설명</h4>
+                    <p id="detailDescription" class="text-sm text-gray-700 leading-relaxed whitespace-pre-line"></p>
+                </div>
+
+                <!-- Safety Guidelines Banner in Modal -->
+                <div class="bg-amber-50 border border-amber-200/80 rounded-xl p-3.5 text-xs text-amber-800 flex items-start gap-2.5">
+                    <i data-lucide="shield-alert" class="w-5 h-5 text-amber-600 shrink-0 mt-0.5"></i>
+                    <div>
+                        <span class="font-bold">개인간 자율 거래 유의사항</span>
+                        <p class="mt-0.5 text-amber-700/90 leading-normal">
+                            플랫폼은 개인 간 직거래/택배 거래에 따른 파손 및 대금 손실에 대해 보상책임을 지지 않습니다. 거래 전 작품 상태와 완충 포장 방식을 대화로 충분히 확인해 주세요.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Bottom Action Button -->
+                <div class="pt-2 flex gap-3">
+                    <button id="startChatBtn" class="flex-1 bg-carrot-500 hover:bg-carrot-600 text-white py-3 rounded-xl font-bold text-sm shadow-md transition flex items-center justify-center gap-2">
+                        <i data-lucide="message-circle" class="w-5 h-5"></i>
+                        <span>작가와 1:1 대화하기</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 1-B. Full Screen Zoom Image Lightbox Modal -->
+    <div id="fullImageViewerModal" class="fixed inset-0 z-60 hidden bg-black/95 backdrop-blur-md flex items-center justify-center p-4">
+        <button onclick="closeModal('fullImageViewerModal')" class="absolute top-4 right-4 z-10 p-2.5 bg-white/10 text-white hover:bg-white/20 rounded-full transition">
+            <i data-lucide="x" class="w-6 h-6"></i>
+        </button>
+        <div class="w-full h-full flex items-center justify-center">
+            <img id="fullImageViewerImg" src="" class="max-w-full max-h-full object-contain shadow-2xl rounded-sm">
+        </div>
+    </div>
+
+    <!-- 2. Artwork Upload Modal -->
+    <div id="uploadModal" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
+        <div class="bg-white rounded-2xl max-w-xl w-full max-h-[92vh] overflow-y-auto shadow-2xl relative flex flex-col my-auto">
+            <div class="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between z-10">
+                <h3 class="text-lg font-bold text-studio-900">내 그림 등록하기</h3>
+                <button onclick="closeModal('uploadModal')" class="text-gray-400 hover:text-gray-600 p-1">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <form id="uploadForm" onsubmit="handleUploadSubmit(event)" class="p-6 space-y-4">
+                <!-- Image & Video Upload Preview Area -->
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1.5">작품 사진 (1~2장) & 작업 영상 (선택)</label>
+                    <div class="grid grid-cols-3 gap-3">
+                        <!-- Mock Photo Uploader 1 -->
+                        <div onclick="triggerMockUpload('photo1')" class="border-2 border-dashed border-gray-300 hover:border-carrot-500 rounded-xl aspect-square flex flex-col items-center justify-center cursor-pointer bg-gray-50 transition relative overflow-hidden group">
+                            <img id="previewPhoto1" class="hidden w-full h-full object-cover">
+                            <div id="placeholderPhoto1" class="text-center p-2">
+                                <i data-lucide="camera" class="w-6 h-6 text-gray-400 mx-auto mb-1 group-hover:text-carrot-500"></i>
+                                <span class="text-[11px] text-gray-500 font-medium">사진 1 (대표)</span>
+                            </div>
+                        </div>
+                        <!-- Mock Photo Uploader 2 -->
+                        <div onclick="triggerMockUpload('photo2')" class="border-2 border-dashed border-gray-300 hover:border-carrot-500 rounded-xl aspect-square flex flex-col items-center justify-center cursor-pointer bg-gray-50 transition relative overflow-hidden group">
+                            <img id="previewPhoto2" class="hidden w-full h-full object-cover">
+                            <div id="placeholderPhoto2" class="text-center p-2">
+                                <i data-lucide="image" class="w-6 h-6 text-gray-400 mx-auto mb-1 group-hover:text-carrot-500"></i>
+                                <span class="text-[11px] text-gray-500 font-medium">사진 2 (상세)</span>
+                            </div>
+                        </div>
+                        <!-- Mock Video Uploader -->
+                        <div onclick="triggerMockUpload('video')" class="border-2 border-dashed border-rose-200 hover:border-rose-400 bg-rose-50/40 rounded-xl aspect-square flex flex-col items-center justify-center cursor-pointer transition relative overflow-hidden group">
+                            <div id="previewVideoBadge" class="hidden absolute inset-0 bg-rose-600 text-white flex flex-col items-center justify-center p-2 text-center">
+                                <i data-lucide="check-circle-2" class="w-6 h-6 mb-1"></i>
+                                <span class="text-[10px] font-bold">영상 첨부됨</span>
+                            </div>
+                            <div id="placeholderVideo" class="text-center p-2">
+                                <i data-lucide="video" class="w-6 h-6 text-rose-400 mx-auto mb-1 group-hover:scale-110 transition"></i>
+                                <span class="text-[11px] text-rose-600 font-bold">작업영상 (선택)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Fields -->
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">작품 제목 *</label>
+                    <input type="text" id="uploadTitle" required placeholder="예: 봄날의 고양이 일기" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-xl focus:border-carrot-500 outline-none">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">작가명 / 닉네임 *</label>
+                        <input type="text" id="uploadArtist" required placeholder="예: 화실아틀리에" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-xl focus:border-carrot-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">판매 가격 (원) *</label>
+                        <input type="number" id="uploadPrice" required placeholder="예: 120000" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-xl focus:border-carrot-500 outline-none">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">지역 (시/군/구) *</label>
+                        <input type="text" id="uploadRegion" required placeholder="예: 서울 마포구, 부산 해운대구" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-xl focus:border-carrot-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">재료 / 기법 *</label>
+                        <select id="uploadMedium" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-xl focus:border-carrot-500 outline-none">
+                            <option value="유화">유화 (Oil)</option>
+                            <option value="아크릴">아크릴 (Acrylic)</option>
+                            <option value="수채화">수채화 (Watercolor)</option>
+                            <option value="펜화">펜화 / 드로잉</option>
+                            <option value="디지털">디지털 프린트</option>
+                            <option value="기타">기타 매체</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">크기 (호수 또는 cm)</label>
+                        <input type="text" id="uploadSize" placeholder="예: 10호 (53x45cm)" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-xl focus:border-carrot-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">액자 유무</label>
+                        <select id="uploadFrame" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-xl focus:border-carrot-500 outline-none">
+                            <option value="액자 포함">액자 포함</option>
+                            <option value="액자 미포함 (원화)">액자 미포함 (원화캔버스)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">가능한 거래 방식 *</label>
+                    <div class="flex items-center gap-4 text-sm mt-1">
+                        <label class="flex items-center gap-1.5 cursor-pointer">
+                            <input type="checkbox" id="checkDirect" checked class="accent-carrot-500 w-4 h-4"> 🤝 직거래
+                        </label>
+                        <label class="flex items-center gap-1.5 cursor-pointer">
+                            <input type="checkbox" id="checkParcel" checked class="accent-carrot-500 w-4 h-4"> 📦 택배거래
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">작품 설명</label>
+                    <textarea id="uploadDesc" rows="3" placeholder="작품에 담긴 이야기, 감상 팁, 작업 의도 등을 자유롭게 적어주세요." class="w-full px-3 py-2 text-sm border border-gray-300 rounded-xl focus:border-carrot-500 outline-none"></textarea>
+                </div>
+
+                <div class="pt-2 border-t border-gray-100 flex gap-3">
+                    <button type="button" onclick="closeModal('uploadModal')" class="w-1/3 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-100 rounded-xl">취소</button>
+                    <button type="submit" class="w-2/3 py-2.5 bg-carrot-500 hover:bg-carrot-600 text-white font-bold text-sm rounded-xl shadow-md transition">등록 완료하기</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 3. 1:1 Carrot Chat Drawer/Modal -->
+    <div id="chatModal" class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-xs flex justify-end">
+        <div class="bg-white w-full max-w-md h-full shadow-2xl flex flex-col justify-between relative animate-in slide-in-from-right duration-200">
+            <!-- Chat Header -->
+            <div class="p-4 border-b border-gray-200 bg-white">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-2">
+                        <span class="font-bold text-studio-900" id="chatPartnerName">달빛화실 작가님</span>
+                        <span class="text-[10px] bg-green-100 text-green-700 font-bold px-1.5 py-0.5 rounded">온라인</span>
+                    </div>
+                    <button onclick="closeModal('chatModal')" class="p-1 text-gray-400 hover:text-gray-600">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+
+                <!-- Product Mini Snippet & Status Bar -->
+                <div class="bg-studio-50 p-2.5 rounded-xl flex items-center justify-between border border-gray-100">
+                    <div class="flex items-center gap-2.5 overflow-hidden">
+                        <img id="chatItemImg" src="" class="w-10 h-10 rounded-lg object-cover">
+                        <div class="truncate">
+                            <h5 id="chatItemTitle" class="text-xs font-bold text-studio-900 truncate"></h5>
+                            <span id="chatItemPrice" class="text-xs text-carrot-600 font-extrabold"></span>
+                        </div>
+                    </div>
+                    <!-- Trade Status Toggle Dropdown -->
+                    <select id="chatStatusSelect" onchange="updateChatTradeStatus(this.value)" class="text-xs bg-white border border-gray-200 font-bold px-2 py-1 rounded-lg text-carrot-600 focus:outline-none">
+                        <option value="판매중">🟢 판매중</option>
+                        <option value="예약중">🟡 예약중</option>
+                        <option value="거래완료">🔴 거래완료</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Chat Messages Log -->
+            <div id="chatMessages" class="flex-1 p-4 overflow-y-auto space-y-3 bg-gray-50 text-xs">
+                <!-- Notice Banner -->
+                <div class="bg-amber-50 text-amber-800 p-2.5 rounded-xl border border-amber-200/60 text-[11px] leading-relaxed">
+                    💡 <strong>그림당근 대화 가이드:</strong> 직거래 시 명확한 장소를 정하거나, 택배 시 포장 상태 사진 공유를 권장합니다.
+                </div>
+            </div>
+
+            <!-- Pre-filled Quick Prompt Suggestions -->
+            <div class="px-4 py-2 bg-white border-t border-gray-100 flex gap-1.5 overflow-x-auto hide-scrollbar text-[11px]">
+                <button onclick="sendQuickPrompt('안녕하세요! 혹시 직거래 장소는 어디가 편하신가요?')" class="px-2.5 py-1 bg-gray-100 hover:bg-carrot-50 hover:text-carrot-600 rounded-full text-gray-600 whitespace-nowrap transition">
+                    🤝 직거래 장소 문의
+                </button>
+                <button onclick="sendQuickPrompt('택배거래 시 에어캡 포장 가능하신가요?')" class="px-2.5 py-1 bg-gray-100 hover:bg-carrot-50 hover:text-carrot-600 rounded-full text-gray-600 whitespace-nowrap transition">
+                    📦 택배 포장 문의
+                </button>
+                <button onclick="sendQuickPrompt('작품의 질감 사진을 조금 더 볼 수 있을까요?')" class="px-2.5 py-1 bg-gray-100 hover:bg-carrot-50 hover:text-carrot-600 rounded-full text-gray-600 whitespace-nowrap transition">
+                    🖼️ 추가 사진 요청
+                </button>
+            </div>
+
+            <!-- Chat Input Bar -->
+            <div class="p-3 bg-white border-t border-gray-200 flex items-center gap-2">
+                <input type="text" id="chatInput" onkeydown="if(event.key==='Enter') sendMessage()" placeholder="메시지를 입력하세요..." class="flex-1 bg-gray-100 px-3 py-2 text-xs rounded-full border border-transparent focus:border-carrot-500 outline-none">
+                <button onclick="sendMessage()" class="p-2 bg-carrot-500 hover:bg-carrot-600 text-white rounded-full shadow-sm transition">
+                    <i data-lucide="send" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ==================== JAVASCRIPT LOGIC ==================== -->
+    <script>
+        // --- 1. SAMPLE MOCK DATA ---
+        const SAMPLE_ARTISTS = [
+            {
+                name: "달빛아틀리에",
+                region: "서울 마포구",
+                avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80",
+                bio: "가을 호수와 사계절 자연의 아련한 풍경을 두터운 질감의 유화로 그립니다.",
+                followers: 128,
+                following: false
+            },
+            {
+                name: "산바람화가",
+                region: "강원 춘천시",
+                avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80",
+                bio: "새벽 안개 낀 산과 들판의 정적을 아크릴과 인파스토 기법으로 포착합니다.",
+                followers: 245,
+                following: true
+            },
+            {
+                name: "수채화꿈나무",
+                region: "대구 수성구",
+                avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80",
+                bio: "맑고 정갈한 수채화로 숲과 작은 카페, 가을 들판 풍경을 캔버스에 표현합니다.",
+                followers: 89,
+                following: false
+            },
+            {
+                name: "도시유랑자",
+                region: "서울 종로구",
+                avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop&q=80",
+                bio: "도시의 오래된 한옥과 야경을 0.05mm 핀펜으로 세밀하게 기록합니다.",
+                followers: 310,
+                following: false
+            },
+            {
+                name: "민들레화실",
+                region: "광주 동구",
+                avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&auto=format&fit=crop&q=80",
+                bio: "행운을 전하는 노란 해바라기 밭과 들꽃 풍경을 그립니다.",
+                followers: 172,
+                following: true
+            },
+            {
+                name: "해변의화가",
+                region: "부산 해운대구",
+                avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&auto=format&fit=crop&q=80",
+                bio: "부산의 파도와 노을 지는 수평선을 시원한 캔버스 작품으로 표현합니다.",
+                followers: 405,
+                following: false
+            }
+        ];
+
+        const SAMPLE_ARTWORKS = [
+            {
+                id: 1,
+                title: "가을 호수의 붉은 노을 풍경",
+                artist: "달빛아틀리에",
+                artistAvatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80",
+                price: 180000,
+                region: "서울 마포구",
+                medium: "유화",
+                size: "10호 (53x45.5cm)",
+                frame: "액자 포함 (원목)",
+                tradeType: "BOTH", // BOTH, DIRECT, PARCEL
+                likes: 38,
+                isLiked: false,
+                isMyUpload: false,
+                photoUrl: "https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=800&auto=format&fit=crop&q=80",
+                videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+                description: "단풍 물든 가을 호수에 붉게 물드는 노을을 묵직한 유화 나이프 기법으로 다층 채색한 원화 작품입니다.",
+                tradeStatus: "판매중"
+            },
+            {
+                id: 2,
+                title: "안개 낀 아침 산과 자작나무 숲",
+                artist: "산바람화가",
+                artistAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80",
+                price: 240000,
+                region: "강원 춘천시",
+                medium: "유화",
+                size: "15호 (65.2x53cm)",
+                frame: "액자 미포함 (원화)",
+                tradeType: "PARCEL",
+                likes: 51,
+                isLiked: true,
+                isMyUpload: false,
+                photoUrl: "https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?w=800&auto=format&fit=crop&q=80",
+                videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+                description: "이른 아침 강원도 산골짜기에 내려앉은 안개와 신비로운 자작나무 숲의 고요한 분위기를 풍경화로 담아냈습니다.",
+                tradeStatus: "판매중"
+            },
+            {
+                id: 3,
+                title: "바람 부는 언덕 위의 집 풍경",
+                artist: "수채화꿈나무",
+                artistAvatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80",
+                price: 95000,
+                region: "대구 수성구",
+                medium: "수채화",
+                size: "8호 (45.5x37.9cm)",
+                frame: "액자 포함 (화이트)",
+                tradeType: "DIRECT",
+                likes: 19,
+                isLiked: false,
+                isMyUpload: false,
+                photoUrl: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=800&auto=format&fit=crop&q=80",
+                videoUrl: null,
+                description: "푸른 언덕 위 작게 얹어진 아담한 집과 맑은 하늘을 맑은 번짐 효과의 수채화 기법으로 서정적으로 그린 풍경화입니다.",
+                tradeStatus: "판매중"
+            },
+            {
+                id: 4,
+                title: "황금빛 해바라기 밭과 가을 하늘",
+                artist: "민들레화실",
+                artistAvatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&auto=format&fit=crop&q=80",
+                price: 130000,
+                region: "광주 동구",
+                medium: "아크릴",
+                size: "10호 (53x45.5cm)",
+                frame: "액자 미포함",
+                tradeType: "BOTH",
+                likes: 42,
+                isLiked: false,
+                isMyUpload: true,
+                photoUrl: "https://images.unsplash.com/photo-1578328819058-b69f3a3b0f6b?w=800&auto=format&fit=crop&q=80",
+                videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+                description: "집안에 행운과 밝은 기운을 불러오는 황금빛 해바라기 들판 풍경화입니다. 선명한 색감과 질감이 매력적인 원화입니다.",
+                tradeStatus: "판매중"
+            },
+            {
+                id: 5,
+                title: "노을 빛에 젖은 서해안 갯벌 풍경",
+                artist: "해변의화가",
+                artistAvatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&auto=format&fit=crop&q=80",
+                price: 210000,
+                region: "부산 해운대구",
+                medium: "아크릴",
+                size: "12호 (60.6x50cm)",
+                frame: "액자 포함 (내추럴 우드)",
+                tradeType: "BOTH",
+                likes: 27,
+                isLiked: true,
+                isMyUpload: false,
+                photoUrl: "https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=800&auto=format&fit=crop&q=80",
+                videoUrl: null,
+                description: "해 질 녘 바닷가 갯벌 위로 반사되는 황금빛 물결과 수평선의 노을을 과감한 터치로 그렸습니다.",
+                tradeStatus: "판매중"
+            },
+            {
+                id: 6,
+                title: "고즈넉한 한옥 마을의 골목길 풍경",
+                artist: "도시유랑자",
+                artistAvatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop&q=80",
+                price: 150000,
+                region: "서울 종로구",
+                medium: "펜화",
+                size: "A3 (29.7x42cm)",
+                frame: "액자 포함 (블랙)",
+                tradeType: "BOTH",
+                likes: 33,
+                isLiked: false,
+                isMyUpload: false,
+                photoUrl: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=800&auto=format&fit=crop&q=80",
+                videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
+                description: "비 내린 후 종로의 돌담길과 한옥 기와지붕 사이로 비치는 정취를 세련된 펜화와 어두운 톤의 잉크 세묘 기법으로 나타낸 유니크한 풍경화입니다.",
+                tradeStatus: "판매중"
+            }
+        ];
+
+        // --- 2. GLOBAL APP STATE ---
+        let artworks = [...SAMPLE_ARTWORKS];
+        let artists = [...SAMPLE_ARTISTS];
+        let currentTab = 'all'; // all, artist, video, fav, my
+        let currentTradeFilter = 'ALL'; // ALL, DIRECT, PARCEL
+        let selectedMedium = '전체';
+        let searchQuery = '';
+        let activeDetailId = null;
+
+        const MEDIUMS = ['전체', '유화', '아크릴', '수채화', '펜화', '디지털', '기타'];
+
+        // --- 3. INITIALIZATION ---
+        window.onload = function() {
+            renderMediumFilters();
+            renderFeed();
+            updateFavBadgeCount();
+            lucide.createIcons();
+        };
+
+        function renderMediumFilters() {
+            const container = document.getElementById('medium-filters');
+            container.innerHTML = MEDIUMS.map(med => `
+                <button onclick="setMediumFilter('${med}')" class="px-2.5 py-1 rounded-md transition ${
+                    selectedMedium === med 
+                    ? 'bg-carrot-500 text-white font-bold' 
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }">
+                    ${med}
+                </button>
+            `).join('');
+        }
+
+        // --- 4. RENDER ARTWORK FEED & ARTISTS LIST ---
+        function renderFeed() {
+            const artworkSection = document.getElementById('artworkSection');
+            const artistSection = document.getElementById('artistSection');
+            const grid = document.getElementById('artworkGrid');
+            const emptyState = document.getElementById('emptyState');
+            const filterBar = document.getElementById('filterBar');
+
+            // Tab handling
+            if (currentTab === 'artist') {
+                artworkSection.classList.add('hidden');
+                artistSection.classList.remove('hidden');
+                filterBar.classList.add('hidden');
+                renderArtistsSection();
+                return;
+            }
+
+            // For 'all', 'video', 'fav', 'my'
+            filterBar.classList.remove('hidden');
+
+            // Filtering logic for artworks
+            let filtered = artworks.filter(item => {
+                if (currentTab === 'video' && !item.videoUrl) return false;
+                if (currentTab === 'fav' && !item.isLiked) return false;
+                if (currentTab === 'my' && !item.isMyUpload) return false;
+
+                if (currentTradeFilter === 'DIRECT' && item.tradeType === 'PARCEL') return false;
+                if (currentTradeFilter === 'PARCEL' && item.tradeType === 'DIRECT') return false;
+
+                if (selectedMedium !== '전체' && item.medium !== selectedMedium) return false;
+
+                if (searchQuery.trim() !== '') {
+                    const q = searchQuery.toLowerCase();
+                    const matchTitle = item.title.toLowerCase().includes(q);
+                    const matchArtist = item.artist.toLowerCase().includes(q);
+                    const matchRegion = item.region.toLowerCase().includes(q);
+                    if (!matchTitle && !matchArtist && !matchRegion) return false;
+                }
+
+                return true;
+            });
+
+            document.getElementById('artworkCountBadge').innerText = `총 ${filtered.length}개`;
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '';
+                artworkSection.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                emptyState.classList.add('flex');
+            } else {
+                emptyState.classList.add('hidden');
+                emptyState.classList.remove('flex');
+                artworkSection.classList.remove('hidden');
+
+                grid.innerHTML = filtered.map(item => `
+                    <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-xs hover:shadow-lg transition-all duration-200 flex flex-col group cursor-pointer" onclick="openDetailModal(${item.id})">
+                        <!-- Media Preview Area -->
+                        <div class="relative aspect-4/3 overflow-hidden bg-gray-100">
+                            <img src="${item.photoUrl}" alt="${item.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                            
+                            ${item.videoUrl ? `
+                                <span class="absolute top-2.5 left-2.5 bg-black/70 backdrop-blur-md text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-md">
+                                    <i data-lucide="play-circle" class="w-3 h-3 text-rose-400"></i> 작업영상
+                                </span>
+                            ` : ''}
+
+                            <span class="absolute bottom-2.5 left-2.5 bg-white/90 backdrop-blur-md text-studio-900 text-[10px] font-semibold px-2 py-0.5 rounded-md shadow-xs">
+                                ${getTradeBadgeLabel(item.tradeType)}
+                            </span>
+
+                            <button onclick="event.stopPropagation(); toggleFav(${item.id})" class="absolute top-2.5 right-2.5 p-2 bg-white/80 hover:bg-white text-gray-400 hover:text-red-500 rounded-full backdrop-blur-md transition shadow-xs">
+                                <i data-lucide="heart" class="w-4 h-4 ${item.isLiked ? 'text-red-500 fill-red-500' : ''}"></i>
+                            </button>
+                        </div>
+
+                        <!-- Card Info Content -->
+                        <div class="p-4 flex-1 flex flex-col justify-between space-y-2">
+                            <div>
+                                <div class="flex items-center justify-between text-xs text-gray-400 mb-1">
+                                    <span class="truncate max-w-[120px] font-medium text-gray-500">${item.artist}</span>
+                                    <span class="flex items-center gap-0.5 shrink-0"><i data-lucide="map-pin" class="w-3 h-3"></i> ${item.region}</span>
+                                </div>
+                                <h3 class="font-bold text-studio-900 text-sm line-clamp-1 group-hover:text-carrot-600 transition">${item.title}</h3>
+                            </div>
+
+                            <div>
+                                <div class="flex items-center gap-1.5 text-[11px] text-gray-500 mb-2">
+                                    <span class="bg-studio-100 px-1.5 py-0.5 rounded text-studio-800 font-medium">${item.medium}</span>
+                                    <span class="truncate">${item.size}</span>
+                                </div>
+
+                                <div class="flex items-center justify-between border-t border-gray-100 pt-2">
+                                    <span class="text-base font-extrabold text-studio-900">${item.price.toLocaleString()}원</span>
+                                    <span class="text-[11px] text-gray-400 flex items-center gap-0.5">
+                                        <i data-lucide="heart" class="w-3 h-3 text-red-400"></i> ${item.likes}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // If initial screen ('all' tab), show artist list section below artwork grid
+            if (currentTab === 'all' && searchQuery === '') {
+                artistSection.classList.remove('hidden');
+                renderArtistsSection();
+            } else if (currentTab !== 'artist') {
+                artistSection.classList.add('hidden');
+            }
+
+            lucide.createIcons();
+        }
+
+        // --- RENDER ARTISTS SECTION ---
+        function renderArtistsSection() {
+            const artistGrid = document.getElementById('artistGrid');
+
+            let filteredArtists = artists.filter(artist => {
+                if (searchQuery.trim() !== '') {
+                    const q = searchQuery.toLowerCase();
+                    return artist.name.toLowerCase().includes(q) || 
+                           artist.region.toLowerCase().includes(q) || 
+                           artist.bio.toLowerCase().includes(q);
+                }
+                return true;
+            });
+
+            artistGrid.innerHTML = filteredArtists.map(artist => {
+                const artistWorks = artworks.filter(a => a.artist === artist.name);
+                const previews = artistWorks.slice(0, 3);
+
+                return `
+                    <div class="bg-white rounded-2xl border border-gray-200/80 p-5 shadow-xs hover:shadow-md transition flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-start justify-between gap-3 mb-3">
+                                <div class="flex items-center gap-3">
+                                    <img src="${artist.avatar}" class="w-12 h-12 rounded-full object-cover border border-gray-200">
+                                    <div>
+                                        <h4 class="font-bold text-studio-900 text-base">${artist.name}</h4>
+                                        <p class="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
+                                            <i data-lucide="map-pin" class="w-3 h-3 text-gray-400"></i> ${artist.region}
+                                        </p>
+                                    </div>
+                                </div>
+                                <button onclick="toggleFollow('${artist.name}')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition ${
+                                    artist.following 
+                                    ? 'bg-gray-100 text-gray-600 border border-gray-200' 
+                                    : 'bg-carrot-500 text-white hover:bg-carrot-600 shadow-2xs'
+                                }">
+                                    ${artist.following ? '팔로잉' : '+ 팔로우'}
+                                </button>
+                            </div>
+
+                            <p class="text-xs text-gray-600 leading-relaxed line-clamp-2 mb-4">
+                                "${artist.bio}"
+                            </p>
+
+                            <div class="mb-4">
+                                <span class="text-[11px] font-semibold text-gray-400 block mb-2">대표 등록 작품 (${artistWorks.length})</span>
+                                <div class="grid grid-cols-3 gap-2">
+                                    ${previews.map(w => `
+                                        <div class="aspect-square rounded-lg overflow-hidden bg-gray-100 cursor-pointer" onclick="openDetailModal(${w.id})">
+                                            <img src="${w.photoUrl}" class="w-full h-full object-cover hover:scale-105 transition">
+                                        </div>
+                                    `).join('')}
+                                    ${previews.length < 3 ? Array(3 - previews.length).fill(0).map(() => `
+                                        <div class="aspect-square rounded-lg bg-gray-50 border border-dashed border-gray-200 flex items-center justify-center text-gray-300">
+                                            <i data-lucide="image" class="w-4 h-4"></i>
+                                        </div>
+                                    `).join('') : ''}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pt-3 border-t border-gray-100 flex items-center justify-between text-xs">
+                            <span class="text-gray-500">팔로워 <strong class="text-studio-900">${artist.followers}</strong></span>
+                            <button onclick="filterByArtist('${artist.name}')" class="text-carrot-600 font-bold hover:underline flex items-center gap-1">
+                                작품 전체보기 <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            lucide.createIcons();
+        }
+
+        function filterByArtist(artistName) {
+            searchQuery = artistName;
+            document.getElementById('searchInput').value = artistName;
+            document.getElementById('searchInputMobile').value = artistName;
+            switchTab('all');
+        }
+
+        function toggleFollow(artistName) {
+            const target = artists.find(a => a.name === artistName);
+            if (target) {
+                target.following = !target.following;
+                target.followers += target.following ? 1 : -1;
+                renderArtistsSection();
+            }
+        }
+
+        function getTradeBadgeLabel(type) {
+            if (type === 'BOTH') return '📦🤝 직거래/택배';
+            if (type === 'DIRECT') return '🤝 직거래만';
+            return '📦 택배거래';
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            ['all', 'artist', 'video', 'fav', 'my'].forEach(t => {
+                const btn = document.getElementById(`tab-${t}`);
+                if (!btn) return;
+                if (t === tab) {
+                    btn.className = "py-3 border-b-2 border-carrot-500 text-carrot-600 font-bold whitespace-nowrap flex items-center gap-1.5";
+                } else {
+                    btn.className = "py-3 border-b-2 border-transparent text-gray-500 hover:text-studio-900 whitespace-nowrap flex items-center gap-1.5";
+                }
+
+                const bottomBtn = document.getElementById(`bottom-nav-${t}`);
+                if (bottomBtn) {
+                    if (t === tab) {
+                        bottomBtn.className = "flex flex-col items-center gap-0.5 text-carrot-600 font-bold p-1";
+                    } else {
+                        bottomBtn.className = "flex flex-col items-center gap-0.5 text-gray-500 hover:text-studio-900 p-1";
+                    }
+                }
+            });
+            renderFeed();
+        }
+
+        function setTradeFilter(type) {
+            currentTradeFilter = type;
+            ['ALL', 'DIRECT', 'PARCEL'].forEach(t => {
+                const btn = document.getElementById(`filter-trade-${t}`);
+                if (t === type) {
+                    btn.className = "px-2.5 py-1 rounded-md bg-white shadow-xs font-semibold text-studio-900";
+                } else {
+                    btn.className = "px-2.5 py-1 rounded-md text-gray-600 hover:text-studio-900";
+                }
+            });
+            renderFeed();
+        }
+
+        function setMediumFilter(med) {
+            selectedMedium = med;
+            renderMediumFilters();
+            renderFeed();
+        }
+
+        function handleSearch() {
+            searchQuery = document.getElementById('searchInput').value;
+            renderFeed();
+        }
+
+        function handleSearchMobile() {
+            searchQuery = document.getElementById('searchInputMobile').value;
+            renderFeed();
+        }
+
+        function resetFilters() {
+            searchQuery = '';
+            document.getElementById('searchInput').value = '';
+            document.getElementById('searchInputMobile').value = '';
+            selectedMedium = '전체';
+            currentTradeFilter = 'ALL';
+            currentTab = 'all';
+            renderMediumFilters();
+            switchTab('all');
+        }
+
+        function toggleFav(id) {
+            const item = artworks.find(a => a.id === id);
+            if (item) {
+                item.isLiked = !item.isLiked;
+                item.likes += item.isLiked ? 1 : -1;
+                renderFeed();
+                updateFavBadgeCount();
+
+                if (activeDetailId === id) {
+                    updateDetailFavBtn(item.isLiked);
+                }
+            }
+        }
+
+        function updateFavBadgeCount() {
+            const favCount = artworks.filter(a => a.isLiked).length;
+            document.getElementById('fav-count').innerText = favCount;
+        }
+
+        // --- 5. DETAIL MODAL LOGIC (Full Image Top + Auto-play Video Underneath) ---
+        function openDetailModal(id) {
+            activeDetailId = id;
+            const item = artworks.find(a => a.id === id);
+            if (!item) return;
+
+            // Text content
+            document.getElementById('detailTitle').innerText = item.title;
+            document.getElementById('detailPrice').innerText = `${item.price.toLocaleString()}원`;
+            document.getElementById('detailArtistName').innerText = item.artist;
+            document.getElementById('detailArtistAvatar').src = item.artistAvatar;
+            document.getElementById('detailRegionText').innerText = item.region;
+            document.getElementById('detailMedium').innerText = item.medium;
+            document.getElementById('detailSize').innerText = item.size;
+            document.getElementById('detailFrame').innerText = item.frame;
+            document.getElementById('detailDescription').innerText = item.description;
+            document.getElementById('detailTradeBadge').innerText = getTradeBadgeLabel(item.tradeType);
+
+            // 1. Full Image Setup (No cropping / object-contain)
+            document.getElementById('detailImage').src = item.photoUrl;
+
+            // 2. Video Player Setup (Autoplay underneath if video exists)
+            const videoContainer = document.getElementById('detailVideoContainer');
+            const videoPlayer = document.getElementById('detailVideoPlayer');
+            const videoSource = document.getElementById('detailVideoSource');
+
+            if (item.videoUrl) {
+                videoSource.src = item.videoUrl;
+                videoPlayer.load();
+                videoContainer.classList.remove('hidden');
+                videoContainer.classList.add('flex');
+                
+                // Attempt autoplay (muted to respect browser policies)
+                videoPlayer.muted = true;
+                videoPlayer.play().catch(err => console.log('Autoplay prevented:', err));
+            } else {
+                videoContainer.classList.add('hidden');
+                videoContainer.classList.remove('flex');
+                videoPlayer.pause();
+            }
+
+            updateDetailFavBtn(item.isLiked);
+
+            // Bind Chat Action
+            document.getElementById('startChatBtn').onclick = () => {
+                closeModal('detailModal');
+                openChatModal(item);
+            };
+
+            document.getElementById('detailModal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function openFullImageViewer(url) {
+            document.getElementById('fullImageViewerImg').src = url;
+            document.getElementById('fullImageViewerModal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function updateDetailFavBtn(isLiked) {
+            const btn = document.getElementById('detailFavBtn');
+            if (isLiked) {
+                btn.innerHTML = `<i data-lucide="heart" class="w-6 h-6 text-red-500 fill-red-500"></i>`;
+            } else {
+                btn.innerHTML = `<i data-lucide="heart" class="w-6 h-6 text-gray-400"></i>`;
+            }
+            lucide.createIcons();
+        }
+
+        function toggleCurrentDetailFav() {
+            if (activeDetailId) toggleFav(activeDetailId);
+        }
+
+        // --- 6. UPLOAD MODAL LOGIC ---
+        let uploadedMockPhoto1 = null;
+        let uploadedMockPhoto2 = null;
+        let uploadedMockVideo = null;
+
+        function openUploadModal() {
+            document.getElementById('uploadModal').classList.remove('hidden');
+        }
+
+        function triggerMockUpload(type) {
+            if (type === 'photo1') {
+                uploadedMockPhoto1 = "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=800&auto=format&fit=crop&q=80";
+                document.getElementById('previewPhoto1').src = uploadedMockPhoto1;
+                document.getElementById('previewPhoto1').classList.remove('hidden');
+                document.getElementById('placeholderPhoto1').classList.add('hidden');
+            } else if (type === 'photo2') {
+                uploadedMockPhoto2 = "https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=800&auto=format&fit=crop&q=80";
+                document.getElementById('previewPhoto2').src = uploadedMockPhoto2;
+                document.getElementById('previewPhoto2').classList.remove('hidden');
+                document.getElementById('placeholderPhoto2').classList.add('hidden');
+            } else if (type === 'video') {
+                uploadedMockVideo = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4";
+                document.getElementById('previewVideoBadge').classList.remove('hidden');
+                document.getElementById('previewVideoBadge').classList.add('flex');
+            }
+        }
+
+        function handleUploadSubmit(e) {
+            e.preventDefault();
+            const title = document.getElementById('uploadTitle').value;
+            const artist = document.getElementById('uploadArtist').value;
+            const price = parseInt(document.getElementById('uploadPrice').value) || 0;
+            const region = document.getElementById('uploadRegion').value;
+            const medium = document.getElementById('uploadMedium').value;
+            const size = document.getElementById('uploadSize').value || '자유 크기';
+            const frame = document.getElementById('uploadFrame').value;
+            const desc = document.getElementById('uploadDesc').value;
+
+            const isDirect = document.getElementById('checkDirect').checked;
+            const isParcel = document.getElementById('checkParcel').checked;
+            let tradeType = 'BOTH';
+            if (isDirect && !isParcel) tradeType = 'DIRECT';
+            if (!isDirect && isParcel) tradeType = 'PARCEL';
+
+            const newItem = {
+                id: Date.now(),
+                title: title,
+                artist: artist,
+                artistAvatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=80",
+                price: price,
+                region: region,
+                medium: medium,
+                size: size,
+                frame: frame,
+                tradeType: tradeType,
+                likes: 0,
+                isLiked: false,
+                isMyUpload: true,
+                photoUrl: uploadedMockPhoto1 || "https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=800&auto=format&fit=crop&q=80",
+                photoUrl2: uploadedMockPhoto2,
+                videoUrl: uploadedMockVideo,
+                description: desc || "작가가 직접 등록한 원화 작품입니다.",
+                tradeStatus: "판매중"
+            };
+
+            artworks.unshift(newItem);
+            closeModal('uploadModal');
+            document.getElementById('uploadForm').reset();
+            
+            document.getElementById('previewPhoto1').classList.add('hidden');
+            document.getElementById('placeholderPhoto1').classList.remove('hidden');
+            document.getElementById('previewPhoto2').classList.add('hidden');
+            document.getElementById('placeholderPhoto2').classList.remove('hidden');
+            document.getElementById('previewVideoBadge').classList.add('hidden');
+            document.getElementById('previewVideoBadge').classList.remove('flex');
+            uploadedMockPhoto1 = null;
+            uploadedMockPhoto2 = null;
+            uploadedMockVideo = null;
+
+            switchTab('my');
+            alert('새 작품이 등록되었습니다!');
+        }
+
+        // --- 7. 1:1 CHAT LOGIC ---
+        let activeChatItem = null;
+
+        function openChatModal(item = null) {
+            activeChatItem = item || artworks[0];
+            document.getElementById('chatPartnerName').innerText = activeChatItem.artist + " 작가님";
+            document.getElementById('chatItemTitle').innerText = activeChatItem.title;
+            document.getElementById('chatItemPrice').innerText = `${activeChatItem.price.toLocaleString()}원`;
+            document.getElementById('chatItemImg').src = activeChatItem.photoUrl;
+            document.getElementById('chatStatusSelect').value = activeChatItem.tradeStatus || "판매중";
+
+            const logs = document.getElementById('chatMessages');
+            logs.innerHTML = `
+                <div class="bg-amber-50 text-amber-800 p-2.5 rounded-xl border border-amber-200/60 text-[11px] leading-relaxed">
+                    💡 <strong>그림당근 안전대화 가이드:</strong> 직거래 시 모임 장소를 사전에 결정하시고, 택배 거래 시 포장 후 상태 사진 공유를 권장합니다.
+                </div>
+                <div class="flex justify-start">
+                    <div class="bg-white p-3 rounded-2xl rounded-tl-none border border-gray-200 max-w-[80%] text-gray-800 shadow-2xs">
+                        안녕하세요! '${activeChatItem.title}' 작품 문의주셔서 감사합니다. 궁금하신 점이 있으신가요? 😊
+                        <span class="block text-[9px] text-gray-400 mt-1">오후 2:10</span>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('chatModal').classList.remove('hidden');
+        }
+
+        function updateChatTradeStatus(status) {
+            if (activeChatItem) {
+                activeChatItem.tradeStatus = status;
+                const logs = document.getElementById('chatMessages');
+                logs.innerHTML += `
+                    <div class="text-center my-2">
+                        <span class="bg-gray-200 text-gray-600 text-[10px] px-2.5 py-0.5 rounded-full font-medium">
+                            거래 상태가 [${status}] 상태로 변경되었습니다.
+                        </span>
+                    </div>
+                `;
+                logs.scrollTop = logs.scrollHeight;
+            }
+        }
+
+        function sendQuickPrompt(text) {
+            document.getElementById('chatInput').value = text;
+            sendMessage();
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const logs = document.getElementById('chatMessages');
+            const now = new Date();
+            const timeStr = `${now.getHours()}:${now.getMinutes() < 10 ? '0' : ''}${now.getMinutes()}`;
+
+            logs.innerHTML += `
+                <div class="flex justify-end">
+                    <div class="bg-carrot-500 text-white p-3 rounded-2xl rounded-tr-none max-w-[80%] shadow-2xs">
+                        ${text}
+                        <span class="block text-[9px] text-orange-100 mt-1 text-right">${timeStr}</span>
+                    </div>
+                </div>
+            `;
+            input.value = '';
+            logs.scrollTop = logs.scrollHeight;
+
+            setTimeout(() => {
+                logs.innerHTML += `
+                    <div class="flex justify-start">
+                        <div class="bg-white p-3 rounded-2xl rounded-tl-none border border-gray-200 max-w-[80%] text-gray-800 shadow-2xs">
+                            네, 확인해주셔서 감사합니다! 편하신 방식으로 친절히 협의해드릴게요. 🎨
+                            <span class="block text-[9px] text-gray-400 mt-1">${timeStr}</span>
+                        </div>
+                    </div>
+                `;
+                logs.scrollTop = logs.scrollHeight;
+            }, 1000);
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+            if (id === 'detailModal') {
+                const videoPlayer = document.getElementById('detailVideoPlayer');
+                if (videoPlayer) videoPlayer.pause();
+            }
+        }
+
+        function scrollToSafety() {
+            document.getElementById('safety-guide').scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+// ===== Supabase 연동 레이어 (원본 목업 함수를 덮어써서 실제 저장/불러오기) =====
+const SUPABASE_URL = 'https://atxzpekuthcoiuqmqjhi.supabase.co';       // 예: https://xxxx.supabase.co
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0eHpwZWt1dGhjb2l1cW1xamhpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzODE1MDksImV4cCI6MjEwNzk1NzUwOX0._2F5fDmaZTmN1V6jo-05rTsgwotP4bxJoaia0r6ENjg
+'; // anon(public) 키만 사용
+const sb = SUPABASE_URL.startsWith('http') ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+let me = null;
+const picked = { photo1: null, photo2: null, video: null };
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const AVATAR = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=80";
+const rowToItem = r => ({ id: r.id, title: r.title, artist: r.artist, artistAvatar: AVATAR, price: r.price,
+  region: r.region, medium: r.medium, size: r.size, frame: r.frame, tradeType: r.trade_type, likes: 0,
+  isLiked: false, isMyUpload: r.owner === me, photoUrl: r.photo_url, photoUrl2: r.photo_url2,
+  videoUrl: r.video_url, description: r.description, tradeStatus: r.trade_status, db: true });
+
+window.onload = async function () {
+  renderMediumFilters();
+  if (sb) {
+    try {
+      let { data: { session } } = await sb.auth.getSession();
+      if (!session) session = (await sb.auth.signInAnonymously()).data.session;
+      me = session.user.id;
+      const [a, l, f] = await Promise.all([
+        sb.from('artworks').select('*').order('created_at', { ascending: false }),
+        sb.from('likes').select('artwork_key'), sb.from('follows').select('artist_name')]);
+      artworks = [...(a.data || []).map(rowToItem), ...SAMPLE_ARTWORKS];
+      const liked = new Set((l.data || []).map(x => x.artwork_key));
+      artworks.forEach(x => { const was = x.isLiked; x.isLiked = liked.has(String(x.id)); x.likes += (x.isLiked ? 1 : 0) - (was ? 1 : 0); });
+      const fol = new Set((f.data || []).map(x => x.artist_name));
+      artists.forEach(x => { const was = x.following; x.following = fol.has(x.name); x.followers += (x.following ? 1 : 0) - (was ? 1 : 0); });
+    } catch (e) { console.error('Supabase 초기화 실패 - 샘플 데이터로 표시', e); }
+  }
+  renderFeed(); updateFavBadgeCount(); lucide.createIcons();
+};
+
+const _toggleFav = toggleFav;
+window.toggleFav = function (id) {
+  _toggleFav(id);
+  const it = artworks.find(a => a.id === id); if (!sb || !me || !it) return;
+  const k = String(id);
+  (it.isLiked ? sb.from('likes').upsert({ user_id: me, artwork_key: k }) : sb.from('likes').delete().eq('artwork_key', k).eq('user_id', me))
+    .then(r => r.error && console.error(r.error));
+};
+
+const _toggleFollow = toggleFollow;
+window.toggleFollow = function (name) {
+  _toggleFollow(name);
+  const t = artists.find(a => a.name === name); if (!sb || !me || !t) return;
+  (t.following ? sb.from('follows').upsert({ user_id: me, artist_name: name }) : sb.from('follows').delete().eq('artist_name', name).eq('user_id', me))
+    .then(r => r.error && console.error(r.error));
+};
+
+// 실제 파일 선택
+window.triggerMockUpload = function (type) {
+  const inp = document.createElement('input'); inp.type = 'file';
+  inp.accept = type === 'video' ? 'video/*' : 'image/*';
+  inp.onchange = () => {
+    const f = inp.files[0]; if (!f) return;
+    if (f.size > 50 * 1024 * 1024) return alert('파일은 50MB 이하만 가능합니다.');
+    picked[type] = f;
+    if (type === 'video') {
+      document.getElementById('previewVideoBadge').classList.remove('hidden');
+      document.getElementById('previewVideoBadge').classList.add('flex');
+    } else {
+      const n = type === 'photo1' ? 1 : 2;
+      document.getElementById('previewPhoto' + n).src = URL.createObjectURL(f);
+      document.getElementById('previewPhoto' + n).classList.remove('hidden');
+      document.getElementById('placeholderPhoto' + n).classList.add('hidden');
+    }
+  };
+  inp.click();
+};
+
+async function uploadFile(file) {
+  const ext = (file.name.split('.').pop() || 'bin').toLowerCase();
+  const path = `${me}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+  const { error } = await sb.storage.from('artworks').upload(path, file, { contentType: file.type });
+  if (error) throw error;
+  return sb.storage.from('artworks').getPublicUrl(path).data.publicUrl;
+}
+
+const _handleUploadSubmit = handleUploadSubmit;
+window.handleUploadSubmit = async function (e) {
+  if (!sb || !me) return _handleUploadSubmit(e);
+  e.preventDefault();
+  const v = id => document.getElementById(id).value;
+  const d = document.getElementById('checkDirect').checked, p = document.getElementById('checkParcel').checked;
+  const btn = e.target.querySelector('[type=submit]'); if (btn) btn.disabled = true;
+  try {
+    const [u1, u2, uv] = await Promise.all([picked.photo1, picked.photo2, picked.video].map(f => f ? uploadFile(f) : null));
+    const { data, error } = await sb.from('artworks').insert({
+      owner: me, title: v('uploadTitle'), artist: v('uploadArtist'), price: parseInt(v('uploadPrice')) || 0,
+      region: v('uploadRegion'), medium: v('uploadMedium'), size: v('uploadSize') || '자유 크기', frame: v('uploadFrame'),
+      trade_type: d && !p ? 'DIRECT' : (!d && p ? 'PARCEL' : 'BOTH'),
+      description: v('uploadDesc') || '작가가 직접 등록한 원화 작품입니다.',
+      photo_url: u1 || SAMPLE_ARTWORKS[0].photoUrl, photo_url2: u2, video_url: uv }).select().single();
+    if (error) throw error;
+    artworks.unshift(rowToItem(data));
+    closeModal('uploadModal'); document.getElementById('uploadForm').reset();
+    ['1', '2'].forEach(n => { document.getElementById('previewPhoto' + n).classList.add('hidden'); document.getElementById('placeholderPhoto' + n).classList.remove('hidden'); });
+    document.getElementById('previewVideoBadge').classList.add('hidden'); document.getElementById('previewVideoBadge').classList.remove('flex');
+    picked.photo1 = picked.photo2 = picked.video = null;
+    switchTab('my'); alert('새 작품이 등록되었습니다!');
+  } catch (err) { console.error(err); alert('등록 실패: ' + (err.message || err)); }
+  finally { if (btn) btn.disabled = false; }
+};
+
+// 채팅: 메시지를 DB에 저장하고 불러오기 (가짜 자동응답 제거)
+function bubble(m, mine) {
+  return mine
+    ? `<div class="flex justify-end"><div class="bg-carrot-500 text-white p-3 rounded-2xl rounded-tr-none max-w-[80%] shadow-2xs">${esc(m)}</div></div>`
+    : `<div class="flex justify-start"><div class="bg-white p-3 rounded-2xl rounded-tl-none border border-gray-200 max-w-[80%] text-gray-800 shadow-2xs">${esc(m)}</div></div>`;
+}
+const _openChatModal = openChatModal;
+window.openChatModal = async function (item = null) {
+  _openChatModal(item);
+  if (!sb || !me) return;
+  const it = activeChatItem, logs = document.getElementById('chatMessages');
+  const { data } = await sb.from('messages').select('*').eq('artwork_key', String(it.id)).eq('buyer_id', me).order('created_at');
+  (data || []).forEach(m => logs.insertAdjacentHTML('beforeend', bubble(m.body, m.sender_id === me)));
+  logs.scrollTop = logs.scrollHeight;
+};
+window.sendMessage = async function () {
+  const input = document.getElementById('chatInput'), text = input.value.trim(); if (!text) return;
+  const logs = document.getElementById('chatMessages');
+  if (!sb || !me) { logs.insertAdjacentHTML('beforeend', bubble(text, true)); input.value = ''; return; }
+  input.value = '';
+  const { error } = await sb.from('messages').insert({ artwork_key: String(activeChatItem.id), buyer_id: me, sender_id: me, body: text });
+  if (error) { alert('전송 실패: ' + error.message); input.value = text; return; }
+  logs.insertAdjacentHTML('beforeend', bubble(text, true)); logs.scrollTop = logs.scrollHeight;
+};
+const _updateChatTradeStatus = updateChatTradeStatus;
+window.updateChatTradeStatus = function (s) {
+  _updateChatTradeStatus(s);
+  if (sb && activeChatItem && activeChatItem.db && activeChatItem.isMyUpload)
+    sb.from('artworks').update({ trade_status: s }).eq('id', activeChatItem.id).then(r => r.error && console.error(r.error));
+};
+</script>
+</body>
+</html>
