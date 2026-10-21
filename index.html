@@ -2,12 +2,13 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>그림당근 - 개인간 미술품 직거래/택배 거래 장터</title>
     <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
     <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/lucide.min.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -58,25 +59,53 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
+        .logo-grad { color: #ff6f0f; filter: drop-shadow(0 2px 0 rgba(194,65,12,.28)); letter-spacing: -0.04em; }
+        .logo-sq { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px 3px; font-size: 21px; line-height: 1; letter-spacing: 0; }
+        .logo-sq i { display: block; text-align: center; transform: none !important; }
+        .logo-grad i { color: #ff6f0f; background: linear-gradient(180deg,#ffb347 0%,#ff7a1a 55%,#e8590c 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; padding: 0 .02em; }
+        .logo-font { font-family: 'Jua', 'Pretendard', sans-serif; letter-spacing: -0.02em; }
+        #authModal, #myPageModal, #adminModal { align-items: center; }
+        /* ===== Mobile optimization ===== */
+        html { -webkit-text-size-adjust: 100%; }
+        body { overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
+        @media (max-width: 767px) {
+            body { padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px)); }
+            header { padding-top: env(safe-area-inset-top, 0px); }
+            input, select, textarea { font-size: 16px !important; }
+            main { padding-top: 1rem; padding-bottom: 1rem; row-gap: 1.5rem; }
+            nav.fixed.bottom-0 { padding-bottom: calc(0.375rem + env(safe-area-inset-bottom, 0px)); }
+            nav.fixed.bottom-0 button { min-width: 56px; min-height: 48px; justify-content: center; }
+            nav.fixed.bottom-0 button span:last-child { font-size: 11px; }
+            nav .overflow-x-auto { gap: 1.25rem; }
+            #filterBar button { min-height: 36px; white-space: nowrap; }
+            footer { margin-top: 1.5rem; padding-bottom: 2rem; }
+        }
+        @media (max-width: 639px) {
+            #detailModal, #uploadModal, #authModal, #myPageModal, #adminModal { align-items: flex-end; padding: 0; }
+            #detailModal > div, #uploadModal > div, #authModal > div, #myPageModal > div, #adminModal > div { border-radius: 1.25rem 1.25rem 0 0; max-height: 94dvh; max-width: 100%; margin: 0; }
+            #uploadForm { padding: 1rem; }
+            #chatModal { height: 100dvh; bottom: auto; }
+            #chatModal > div { max-width: 100%; }
+            #detailModal button[onclick*="closeModal"] { padding: 0.65rem; }
+        }
     </style>
 </head>
-<body class="bg-studio-50 text-studio-900 font-sans min-h-screen flex flex-col pb-16 md:pb-0">
+<body class="bg-studio-50 text-studio-900 font-sans min-h-screen flex flex-col pb-20 md:pb-0">
 
     <!-- Header / Navbar -->
-    <header class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-gray-200">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+    <header class="relative md:sticky md:top-0 z-30 bg-white/90 backdrop-blur-md border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 md:h-16 flex items-center justify-between gap-3 md:gap-4">
             <!-- Brand Logo -->
-            <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('all')">
-                <div class="bg-carrot-500 text-white p-2 rounded-2xl flex items-center justify-center shadow-md shadow-carrot-500/20">
-                    <i data-lucide="palette" class="w-6 h-6"></i>
-                </div>
-                <div class="flex flex-col">
-                    <span class="text-xl font-bold tracking-tight text-studio-900 flex items-center gap-1">
-                        그림당근 <span class="text-xs bg-carrot-100 text-carrot-600 px-2 py-0.5 rounded-full font-medium">C2C</span>
-                    </span>
-                    <span class="text-[11px] font-semibold text-carrot-600 -mt-1 tracking-wide">Art Carrot</span>
-                    <span class="text-[11px] text-gray-500 -mt-0.5 hidden sm:inline">개인 그림 직거래</span>
-                </div>
+            <div class="flex items-center gap-2 cursor-pointer" onclick="switchTab('all')">
+                <svg viewBox="0 0 48 48" class="w-9 h-9 shrink-0" aria-label="그림당근">
+                    <path d="M24 15c-2-6-8-10-12-9 1 5 6 9 12 9z" fill="#3f9b3a"/>
+                    <path d="M24 15c1-8 7-12 12-10-1 6-6 10-12 10z" fill="#5cc152"/>
+                    <path d="M24 14c-1-5 0-9 0-9s2 4 0 9z" fill="#2f7d2c"/>
+                    <path d="M14 18c4-4 16-4 20 0 2 3 0 9-6 20-2 4-3 7-4 8-1-1-2-4-4-8-6-11-8-17-6-20z" fill="#ff6f0f"/>
+                    <path d="M19 25c3-1 6-1 9 0M21 31c2-1 4-1 6 0M22.5 37c1-.5 2-.5 3 0" stroke="#fff" stroke-width="2" stroke-linecap="round" fill="none" opacity=".75"/>
+                </svg>
+                <div class="logo-font logo-grad logo-sq" aria-label="그림당근"><i>그</i><i>림</i><i>당</i><i>근</i></div>
+                <span class="hidden sm:block text-[10px] text-gray-500 leading-tight">Art Carrot<br>개인 그림 직거래</span>
             </div>
 
             <!-- Search Bar -->
@@ -88,10 +117,12 @@
 
             <!-- Right Actions -->
             <div class="flex items-center gap-2 sm:gap-3">
-                <button onclick="openChatModal()" class="relative p-2 text-gray-600 hover:text-carrot-500 hover:bg-carrot-50 rounded-full transition" title="1:1 채팅">
+                <button onclick="openChatModal()" class="hidden md:block relative p-2 text-gray-600 hover:text-carrot-500 hover:bg-carrot-50 rounded-full transition" title="1:1 채팅">
                     <i data-lucide="message-circle" class="w-6 h-6"></i>
                     <span class="absolute top-1 right-1 w-2.5 h-2.5 bg-carrot-500 rounded-full border-2 border-white"></span>
                 </button>
+                <button id="authBtn" onclick="onAuthClick()" class="text-xs sm:text-sm font-semibold text-gray-700 hover:text-carrot-600 px-1.5 sm:px-2 py-2 rounded-xl whitespace-nowrap">로그인</button>
+                <button id="myBtn" onclick="openMyPage()" class="text-xs sm:text-sm font-semibold text-gray-700 hover:text-carrot-600 px-1.5 sm:px-2 py-2 rounded-xl whitespace-nowrap flex items-center gap-1"><span id="myBtnPhoto"></span><span class="hidden sm:inline">마이페이지</span><span class="sm:hidden">MY</span></button>
                 <button onclick="openUploadModal()" class="bg-carrot-500 hover:bg-carrot-600 text-white text-sm font-semibold px-4 py-2 rounded-xl shadow-sm transition flex items-center gap-1.5">
                     <i data-lucide="plus" class="w-4 h-4"></i>
                     <span class="hidden sm:inline">작품 등록하기</span>
@@ -111,7 +142,7 @@
     </header>
 
     <!-- Navigation Tabs & Category Filters Bar -->
-    <nav class="bg-white border-b border-gray-200 sticky top-16 md:top-16 z-20">
+    <nav class="bg-white border-b border-gray-200 sticky top-0 md:top-16 z-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Feed Tabs -->
             <div class="flex gap-6 border-b border-gray-100 text-sm font-medium overflow-x-auto hide-scrollbar">
@@ -135,13 +166,13 @@
             <!-- Filter Badges / Tags Bar -->
             <div id="filterBar" class="py-3 flex items-center gap-2 overflow-x-auto hide-scrollbar text-xs">
                 <!-- Trade Type Filter -->
-                <div class="flex items-center gap-1 bg-gray-100 p-1 rounded-lg">
+                <div class="hidden items-center gap-1 bg-gray-100 p-1 rounded-lg">
                     <button onclick="setTradeFilter('ALL')" id="filter-trade-ALL" class="px-2.5 py-1 rounded-md bg-white shadow-xs font-semibold text-studio-900">전체</button>
                     <button onclick="setTradeFilter('DIRECT')" id="filter-trade-DIRECT" class="px-2.5 py-1 rounded-md text-gray-600 hover:text-studio-900">🤝 직거래</button>
                     <button onclick="setTradeFilter('PARCEL')" id="filter-trade-PARCEL" class="px-2.5 py-1 rounded-md text-gray-600 hover:text-studio-900">📦 택배</button>
                 </div>
 
-                <div class="h-4 w-[1px] bg-gray-300 mx-1"></div>
+                <div class="hidden h-4 w-[1px] bg-gray-300 mx-1"></div>
 
                 <!-- Medium Filter Tags -->
                 <div class="flex gap-1.5" id="medium-filters">
@@ -178,7 +209,7 @@
                 <span id="artworkCountBadge" class="text-xs text-gray-500 font-medium"></span>
             </div>
             
-            <div id="artworkGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+            <div id="artworkGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
                 <!-- Dynamic Artwork Cards populate here -->
             </div>
         </section>
@@ -231,7 +262,7 @@
             <span class="absolute top-1 right-2 w-2 h-2 bg-carrot-500 rounded-full"></span>
             <span class="text-[10px]">채팅</span>
         </button>
-        <button onclick="switchTab('my')" id="bottom-nav-my" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-studio-900 p-1">
+        <button onclick="openMyPage()" id="bottom-nav-my" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-studio-900 p-1">
             <i data-lucide="user" class="w-5 h-5"></i>
             <span class="text-[10px]">MY</span>
         </button>
@@ -267,6 +298,42 @@
             </div>
         </div>
     </footer>
+
+        <!-- 로그인/회원가입 -->
+    <div id="authModal" class="fixed inset-0 z-50 hidden bg-black/60 flex items-center justify-center p-3">
+        <div class="bg-white rounded-2xl w-full max-w-sm shadow-2xl p-5 relative">
+            <button onclick="closeModal('authModal')" class="absolute top-3 right-3 p-2 text-gray-400"><i data-lucide="x" class="w-5 h-5"></i></button>
+            <h3 id="authTitle" class="logo-font text-2xl text-carrot-500 mb-1">로그인</h3>
+            <p id="authSub" class="text-xs text-gray-500 mb-4">이메일과 비밀번호로 로그인하세요.</p>
+            <form onsubmit="submitAuth(event)" class="space-y-3">
+                <div id="signupOnly" class="hidden space-y-3">
+                    <div class="flex items-center gap-3"><img id="authPhotoPrev" class="w-14 h-14 rounded-full object-cover bg-gray-100 border border-gray-200" alt=""><button type="button" onclick="pickAuthPhoto()" class="text-xs font-semibold px-3 py-2 rounded-xl border border-gray-300">프로필 사진 선택 (선택사항)</button></div>
+                    <input id="authName" placeholder="이름 (닉네임)" class="w-full px-3 py-2.5 border border-gray-300 rounded-xl outline-none focus:border-carrot-500">
+                    <input id="authRegion" placeholder="사는 곳 (예: 서울 마포구)" class="w-full px-3 py-2.5 border border-gray-300 rounded-xl outline-none focus:border-carrot-500">
+                </div>
+                <input id="authEmail" type="email" required placeholder="이메일" class="w-full px-3 py-2.5 border border-gray-300 rounded-xl outline-none focus:border-carrot-500">
+                <input id="authPw" type="password" required minlength="6" placeholder="비밀번호 (6자 이상)" class="w-full px-3 py-2.5 border border-gray-300 rounded-xl outline-none focus:border-carrot-500">
+                <div class="flex gap-2"><button type="button" onclick="closeModal('authModal')" class="flex-1 border border-gray-300 text-gray-700 font-bold py-3 rounded-xl">취소</button><button id="authSubmit" class="flex-[2] bg-carrot-500 hover:bg-carrot-600 text-white font-bold py-3 rounded-xl">로그인</button></div>
+            </form>
+            <button id="authToggle" onclick="toggleAuthMode()" class="w-full mt-3 text-xs text-gray-500 underline">아직 회원이 아니세요? 회원가입</button>
+        </div>
+    </div>
+
+    <!-- 내 페이지 -->
+    <div id="myPageModal" class="fixed inset-0 z-50 hidden bg-black/60 flex items-center justify-center p-3">
+        <div class="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl p-5 relative">
+            <button onclick="closeModal('myPageModal')" class="absolute top-3 right-3 p-2 text-gray-400"><i data-lucide="x" class="w-5 h-5"></i></button>
+            <div id="myPageBody"></div>
+        </div>
+    </div>
+
+    <!-- 관리자 -->
+    <div id="adminModal" class="fixed inset-0 z-50 hidden bg-black/60 flex items-center justify-center p-3">
+        <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl p-5 relative">
+            <button onclick="closeModal('adminModal')" class="absolute top-3 right-3 p-2 text-gray-400"><i data-lucide="x" class="w-5 h-5"></i></button>
+            <div id="adminBody"></div>
+        </div>
+    </div>
 
     <!-- ==================== MODALS ==================== -->
 
@@ -404,14 +471,14 @@
             <form id="uploadForm" onsubmit="handleUploadSubmit(event)" class="p-6 space-y-4">
                 <!-- Image & Video Upload Preview Area -->
                 <div>
-                    <label class="block text-xs font-bold text-gray-700 mb-1.5">작품 사진 (1~2장) & 작업 영상 (선택)</label>
+                    <label class="block text-xs font-bold text-gray-700 mb-1.5">대표 사진 1장은 필수 · 상세 사진·작업영상은 선택</label>
                     <div class="grid grid-cols-3 gap-3">
                         <!-- Mock Photo Uploader 1 -->
                         <div onclick="triggerMockUpload('photo1')" class="border-2 border-dashed border-gray-300 hover:border-carrot-500 rounded-xl aspect-square flex flex-col items-center justify-center cursor-pointer bg-gray-50 transition relative overflow-hidden group">
                             <img id="previewPhoto1" class="hidden w-full h-full object-cover">
                             <div id="placeholderPhoto1" class="text-center p-2">
                                 <i data-lucide="camera" class="w-6 h-6 text-gray-400 mx-auto mb-1 group-hover:text-carrot-500"></i>
-                                <span class="text-[11px] text-gray-500 font-medium">사진 1 (대표)</span>
+                                <span class="text-[11px] text-gray-500 font-medium">사진 1 (대표·필수)</span>
                             </div>
                         </div>
                         <!-- Mock Photo Uploader 2 -->
@@ -419,7 +486,7 @@
                             <img id="previewPhoto2" class="hidden w-full h-full object-cover">
                             <div id="placeholderPhoto2" class="text-center p-2">
                                 <i data-lucide="image" class="w-6 h-6 text-gray-400 mx-auto mb-1 group-hover:text-carrot-500"></i>
-                                <span class="text-[11px] text-gray-500 font-medium">사진 2 (상세)</span>
+                                <span class="text-[11px] text-gray-500 font-medium">사진 2 (상세·선택)</span>
                             </div>
                         </div>
                         <!-- Mock Video Uploader -->
@@ -450,6 +517,7 @@
                     <div>
                         <label class="block text-xs font-bold text-gray-700 mb-1">판매 가격 (원) *</label>
                         <input type="number" id="uploadPrice" required placeholder="예: 120000" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-xl focus:border-carrot-500 outline-none">
+<label class="flex items-center gap-1.5 mt-1.5 text-[11px] text-gray-600 cursor-pointer"><input type="checkbox" id="uploadOffer" class="accent-carrot-500"> 가격 제안 받기</label>
                     </div>
                 </div>
 
@@ -746,6 +814,42 @@
             }
         ];
 
+        // --- 샘플 그림: 완성형 풍경화(SVG)로 대체 / 아바타는 이니셜 ---
+        function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+        function wavePath(base,amp,seed,color){let d='M0 600 L0 '+base;for(let x=0;x<=800;x+=40){d+=' L'+x+' '+(base+amp*Math.sin(seed+x/110)+amp*.5*Math.sin(seed*2+x/47)).toFixed(1)}return `<path d="${d} L800 600Z" fill="${color}"/>`}
+        function paint(i){
+            const S=[
+              {sky:['#4a2a6e','#ff8a3d'],sun:[400,300,70,'#ffd98a'],layers:[['#7b3a52',330,25],['#a5432b',365,18],['#d0602f',395,6]],ex:'<ellipse cx="400" cy="440" rx="70" ry="12" fill="#ffd98a" opacity=".6"/><ellipse cx="400" cy="470" rx="40" ry="8" fill="#ffd98a" opacity=".4"/>'},
+              {sky:['#e3edf0','#b9cdd2'],sun:[570,170,45,'#f8f3e4'],layers:[['#9fb5bb',300,30],['#7f9aa3',350,25],['#5f7f78',410,18]],ex:[90,210,330,450,590,700].map((x,k)=>`<rect x="${x}" y="${300+k%3*20}" width="${14+k%2*6}" height="320" fill="#f4f1ea"/><path d="M${x+2} ${340+k*9}h8M${x+3} ${400+k*7}h9" stroke="#3a3a36" stroke-width="2"/>`).join('')+'<rect width="800" height="600" fill="#fff" opacity=".18"/>'},
+              {sky:['#7fbde8','#eaf5fb'],sun:null,layers:[['#86c46f',380,25],['#58a050',450,30],['#3f8a3e',520,15]],ex:'<ellipse cx="160" cy="120" rx="80" ry="22" fill="#fff" opacity=".9"/><ellipse cx="560" cy="90" rx="100" ry="24" fill="#fff" opacity=".85"/><rect x="500" y="352" width="84" height="62" fill="#f3e2c7"/><polygon points="490,354 542,310 594,354" fill="#b5472f"/><rect x="530" y="384" width="16" height="30" fill="#7a4a2a"/><rect x="200" y="360" width="10" height="70" fill="#5a3a1e"/><circle cx="205" cy="345" r="40" fill="#2f7d2c"/>'},
+              {sky:['#5fb0ee','#dff1ff'],sun:[660,110,50,'#fff2a8'],layers:[['#8fbf6e',330,14],['#6a9a3c',345,8]],ex:(()=>{const r=mulberry(7);let s='<rect y="350" width="800" height="250" fill="#6a9a3c"/>';for(let k=0;k<46;k++){const y=370+r()*210,x=r()*800,z=.5+(y-370)/190*1.1;s+=`<rect x="${x-2*z}" y="${y}" width="${4*z}" height="${60*z}" fill="#3f7a2c"/><circle cx="${x}" cy="${y}" r="${20*z}" fill="#f6c613"/><circle cx="${x}" cy="${y}" r="${9*z}" fill="#6b3f12"/>`}return s})()},
+              {sky:['#3a2a5a','#ff9a5a'],sun:[400,330,85,'#ffe0a0'],layers:[['#8a5a6a',345,8]],ex:'<rect y="350" width="800" height="250" fill="#8a5a4a"/><ellipse cx="400" cy="420" rx="260" ry="22" fill="#ffc07a" opacity=".55"/><ellipse cx="200" cy="500" rx="150" ry="16" fill="#ffc07a" opacity=".4"/><ellipse cx="600" cy="540" rx="170" ry="18" fill="#ffb070" opacity=".4"/><path d="M560 400l60 0 -14 22h-32z" fill="#2a1a2a"/><path d="M590 400v-40l22 34z" fill="#2a1a2a"/>'},
+              {sky:['#a9bccf','#ece3d3'],sun:null,layers:[],ex:'<polygon points="0,180 330,260 330,600 0,600" fill="#8a7b6a"/><polygon points="800,160 470,260 470,600 800,600" fill="#9a8b78"/><polygon points="330,300 470,300 640,600 160,600" fill="#c0b09a"/><path d="M0 150Q160 170 330 250L330 270Q150 200 0 190Z" fill="#2e2a28"/><path d="M800 130Q640 160 470 250L470 270Q650 190 800 170Z" fill="#2e2a28"/><rect x="396" y="300" width="8" height="90" fill="#4a3a2a"/><circle cx="400" cy="296" r="12" fill="#ffd27a"/><rect x="340" y="330" width="120" height="50" fill="#e8dfd0" opacity=".7"/>'}
+            ][i%6];
+            const st=['oil','water','acrylic','dab','digital','ink'][i%6];
+            let c='<rect width="800" height="600" fill="url(#g)"/>';
+            if(S.sun)c+=`<circle cx="${S.sun[0]}" cy="${S.sun[1]}" r="${S.sun[2]}" fill="${S.sun[3]}" opacity=".92"/>`;
+            S.layers.forEach((l,k)=>c+=wavePath(l[1],l[2],i*3+k,l[0]));
+            c+=S.ex;
+            const r=mulberry(i+11),pal=[...S.sky,...S.layers.map(l=>l[0]),S.sun?S.sun[3]:'#fff'],thick=st==='oil'||st==='dab'||st==='acrylic';
+            const N={oil:320,dab:560,acrylic:150,ink:300,water:50,digital:0}[st];let br='';
+            for(let k=0;k<N;k++){const x=(r()*800).toFixed(0),y=(r()*600).toFixed(0);let col,w,len,dy,op;
+              if(st==='ink'){col='#222';w=1;len=8+r()*14;dy=len*.9;op=.4}
+              else if(thick){col=pal[(r()*pal.length)|0];w=st==='acrylic'?10+r()*12:st==='dab'?6+r()*8:5+r()*7;len=st==='acrylic'?30+r()*70:st==='dab'?4+r()*8:12+r()*40;dy=r()*10-5;op=st==='acrylic'?.3:.22}
+              else{col=r()<.5?'#fff':'#000';w=2+r()*3;len=12+r()*40;dy=r()*10-5;op=.08}
+              br+=`<path d="M${x} ${y}l${len.toFixed(0)} ${dy.toFixed(0)}" stroke="${col}" stroke-width="${w.toFixed(1)}" opacity="${op}" stroke-linecap="round"/>`}
+            const defs=`<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${S.sky[0]}"/><stop offset="1" stop-color="${S.sky[1]}"/></linearGradient><filter id="w" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency=".012" numOctaves="3" seed="3" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="28"/><feGaussianBlur stdDeviation="2.2"/></filter><filter id="p"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2"/><feColorMatrix values="0 0 0 0 .45 0 0 0 0 .4 0 0 0 0 .35 0 0 0 .22 0"/></filter></defs>`;
+            let body=c+br;
+            if(st==='water')body=`<rect width="800" height="600" fill="#f6f0e4"/><g filter="url(#w)" transform="translate(40 40) scale(.9)">${c}${br}</g><rect width="800" height="600" filter="url(#p)"/>`;
+            if(st==='ink'){const lines=c.replace(/^<rect[^>]*\/>/,'').replace(/fill="#[0-9a-fA-F]{3,6}"/g,'fill="#fbf8f1" stroke="#1f1f1f" stroke-width="2.2"');body=`<rect width="800" height="600" fill="#fbf8f1"/>${lines}${br}<rect width="800" height="600" filter="url(#p)"/>`}
+            if(thick)body+='<rect width="800" height="600" filter="url(#p)" opacity=".7"/>';
+            if(st==='digital')body=c+'<rect width="800" height="600" fill="url(#g)" opacity=".12"/>';
+            return 'data:image/svg+xml;utf8,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">${defs}${body}</svg>`);
+        }
+        function avatar(name){let h=0;for(const c of String(name))h=(h*31+c.charCodeAt(0))%360;return 'data:image/svg+xml;utf8,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="hsl(${h},55%,60%)"/><text x="50" y="66" font-size="48" text-anchor="middle" fill="#fff" font-family="sans-serif" font-weight="700">${String(name).charAt(0)}</text></svg>`)}
+        SAMPLE_ARTWORKS.forEach((a,i)=>{a.id=-Math.abs(a.id);a.medium=['유화','수채화','아크릴','유화','디지털','펜화'][i%6];a.description=['두꺼운 유화 물감을 붓과 나이프로 겹겹이 올려 가을 호수에 번지는 붉은 노을을 표현한 원화입니다.','물을 넉넉히 머금은 번짐 기법으로 안개 낀 아침 산과 자작나무 숲의 고요함을 담은 수채화입니다.','선명한 아크릴 물감을 힘 있는 붓질로 올려 바람 부는 언덕 위의 집을 그린 원화입니다.','해바라기 밭의 강렬한 색을 짧고 두툼한 붓터치로 쌓아 올린 유화 작품입니다.','서해안 갯벌에 번지는 노을빛을 깔끔한 그라데이션으로 표현한 디지털 일러스트 프린트입니다.','한옥 마을 골목길을 가는 펜선과 해칭 기법으로 세밀하게 그려낸 펜화 작품입니다.'][i%6];a.photoUrl=paint(i);a.artistAvatar=avatar(a.artist);delete a.photoUrl2;});
+        SAMPLE_ARTISTS.forEach(a=>{a.avatar=avatar(a.name);});
+
         // --- 2. GLOBAL APP STATE ---
         let artworks = [...SAMPLE_ARTWORKS];
         let artists = [...SAMPLE_ARTISTS];
@@ -833,16 +937,12 @@
                 artworkSection.classList.remove('hidden');
 
                 grid.innerHTML = filtered.map(item => `
-                    <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-xs hover:shadow-lg transition-all duration-200 flex flex-col group cursor-pointer" onclick="openDetailModal(${item.id})">
+                    <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-xs hover:shadow-lg transition-all duration-200 flex flex-col group cursor-pointer" data-art="${item.id}" onclick="openDetailModal(${item.id})">
                         <!-- Media Preview Area -->
                         <div class="relative aspect-4/3 overflow-hidden bg-gray-100">
                             <img src="${item.photoUrl}" alt="${item.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
                             
-                            ${item.videoUrl ? `
-                                <span class="absolute top-2.5 left-2.5 bg-black/70 backdrop-blur-md text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-md">
-                                    <i data-lucide="play-circle" class="w-3 h-3 text-rose-400"></i> 작업영상
-                                </span>
-                            ` : ''}
+                            
 
                             <span class="absolute bottom-2.5 left-2.5 bg-white/90 backdrop-blur-md text-studio-900 text-[10px] font-semibold px-2 py-0.5 rounded-md shadow-xs">
                                 ${getTradeBadgeLabel(item.tradeType)}
@@ -854,11 +954,11 @@
                         </div>
 
                         <!-- Card Info Content -->
-                        <div class="p-4 flex-1 flex flex-col justify-between space-y-2">
+                        <div class="p-3 sm:p-4 flex-1 flex flex-col justify-between space-y-2">
                             <div>
                                 <div class="flex items-center justify-between text-xs text-gray-400 mb-1">
-                                    <span class="truncate max-w-[120px] font-medium text-gray-500">${item.artist}</span>
-                                    <span class="flex items-center gap-0.5 shrink-0"><i data-lucide="map-pin" class="w-3 h-3"></i> ${item.region}</span>
+                                    <span class="truncate max-w-[50%] sm:max-w-[120px] font-medium text-gray-500">${item.artist}</span>
+                                    <span class="flex items-center gap-0.5 min-w-0 truncate"><i data-lucide="map-pin" class="w-3 h-3 shrink-0"></i> <span class="truncate">${item.region}</span></span>
                                 </div>
                                 <h3 class="font-bold text-studio-900 text-sm line-clamp-1 group-hover:text-carrot-600 transition">${item.title}</h3>
                             </div>
@@ -870,7 +970,7 @@
                                 </div>
 
                                 <div class="flex items-center justify-between border-t border-gray-100 pt-2">
-                                    <span class="text-base font-extrabold text-studio-900">${item.price.toLocaleString()}원</span>
+                                    <span class="text-sm sm:text-base font-extrabold text-studio-900">${item.price.toLocaleString()}원${item.priceOffer ? '<em class="not-italic ml-1 text-[10px] font-semibold text-carrot-600">제안가능</em>' : ''}</span>
                                     <span class="text-[11px] text-gray-400 flex items-center gap-0.5">
                                         <i data-lucide="heart" class="w-3 h-3 text-red-400"></i> ${item.likes}
                                     </span>
@@ -936,22 +1036,7 @@
                                 "${artist.bio}"
                             </p>
 
-                            <div class="mb-4">
-                                <span class="text-[11px] font-semibold text-gray-400 block mb-2">대표 등록 작품 (${artistWorks.length})</span>
-                                <div class="grid grid-cols-3 gap-2">
-                                    ${previews.map(w => `
-                                        <div class="aspect-square rounded-lg overflow-hidden bg-gray-100 cursor-pointer" onclick="openDetailModal(${w.id})">
-                                            <img src="${w.photoUrl}" class="w-full h-full object-cover hover:scale-105 transition">
-                                        </div>
-                                    `).join('')}
-                                    ${previews.length < 3 ? Array(3 - previews.length).fill(0).map(() => `
-                                        <div class="aspect-square rounded-lg bg-gray-50 border border-dashed border-gray-200 flex items-center justify-center text-gray-300">
-                                            <i data-lucide="image" class="w-4 h-4"></i>
-                                        </div>
-                                    `).join('') : ''}
-                                </div>
                             </div>
-                        </div>
 
                         <div class="pt-3 border-t border-gray-100 flex items-center justify-between text-xs">
                             <span class="text-gray-500">팔로워 <strong class="text-studio-900">${artist.followers}</strong></span>
@@ -1078,7 +1163,7 @@
 
             // Text content
             document.getElementById('detailTitle').innerText = item.title;
-            document.getElementById('detailPrice').innerText = `${item.price.toLocaleString()}원`;
+            document.getElementById('detailPrice').innerText = `${item.price.toLocaleString()}원` + (item.priceOffer ? ' (가격 제안 가능)' : '');
             document.getElementById('detailArtistName').innerText = item.artist;
             document.getElementById('detailArtistAvatar').src = item.artistAvatar;
             document.getElementById('detailRegionText').innerText = item.region;
@@ -1322,14 +1407,13 @@
 <script>
 // ===== Supabase 연동 레이어 (원본 목업 함수를 덮어써서 실제 저장/불러오기) =====
 const SUPABASE_URL = 'https://atxzpekuthcoiuqmqjhi.supabase.co';       // 예: https://xxxx.supabase.co
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0eHpwZWt1dGhjb2l1cW1xamhpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzODE1MDksImV4cCI6MjEwNzk1NzUwOX0._2F5fDmaZTmN1V6jo-05rTsgwotP4bxJoaia0r6ENjg
-'; // anon(public) 키만 사용
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0eHpwZWt1dGhjb2l1cW1xamhpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzODE1MDksImV4cCI6MjEwNzk1NzUwOX0._2F5fDmaZTmN1V6jo-05rTsgwotP4bxJoaia0r6ENjg'; // anon(public) 키만 사용
 const sb = SUPABASE_URL.startsWith('http') ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 let me = null;
 const picked = { photo1: null, photo2: null, video: null };
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const AVATAR = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=80";
-const rowToItem = r => ({ id: r.id, title: r.title, artist: r.artist, artistAvatar: AVATAR, price: r.price,
+const rowToItem = r => ({ id: r.id, title: r.title, artist: r.artist, artistAvatar: r.artist_avatar || avatar(r.artist), priceOffer: !!r.price_offer, price: r.price,
   region: r.region, medium: r.medium, size: r.size, frame: r.frame, tradeType: r.trade_type, likes: 0,
   isLiked: false, isMyUpload: r.owner === me, photoUrl: r.photo_url, photoUrl2: r.photo_url2,
   videoUrl: r.video_url, description: r.description, tradeStatus: r.trade_status, db: true });
@@ -1348,6 +1432,7 @@ window.onload = async function () {
       const liked = new Set((l.data || []).map(x => x.artwork_key));
       artworks.forEach(x => { const was = x.isLiked; x.isLiked = liked.has(String(x.id)); x.likes += (x.isLiked ? 1 : 0) - (was ? 1 : 0); });
       const fol = new Set((f.data || []).map(x => x.artist_name));
+      (a.data || []).forEach(r => { if (!artists.some(x => x.name === r.artist)) artists.push({ name: r.artist, region: r.region || '', bio: '새로 등록한 작가입니다.', avatar: r.artist_avatar || avatar(r.artist), followers: 0, following: false }); });
       artists.forEach(x => { const was = x.following; x.following = fol.has(x.name); x.followers += (x.following ? 1 : 0) - (was ? 1 : 0); });
     } catch (e) { console.error('Supabase 초기화 실패 - 샘플 데이터로 표시', e); }
   }
@@ -1414,9 +1499,10 @@ window.handleUploadSubmit = async function (e) {
       region: v('uploadRegion'), medium: v('uploadMedium'), size: v('uploadSize') || '자유 크기', frame: v('uploadFrame'),
       trade_type: d && !p ? 'DIRECT' : (!d && p ? 'PARCEL' : 'BOTH'),
       description: v('uploadDesc') || '작가가 직접 등록한 원화 작품입니다.',
-      photo_url: u1 || SAMPLE_ARTWORKS[0].photoUrl, photo_url2: u2, video_url: uv }).select().single();
+      price_offer: document.getElementById('uploadOffer').checked, artist_avatar: (profile && profile.avatar_url) || null, photo_url: u1, photo_url2: u2, video_url: uv }).select().single();
     if (error) throw error;
     artworks.unshift(rowToItem(data));
+    if (!artists.some(x => x.name === data.artist)) artists.push({ name: data.artist, region: data.region || '', bio: '새로 등록한 작가입니다.', avatar: data.artist_avatar || avatar(data.artist), followers: 0, following: false });
     closeModal('uploadModal'); document.getElementById('uploadForm').reset();
     ['1', '2'].forEach(n => { document.getElementById('previewPhoto' + n).classList.add('hidden'); document.getElementById('placeholderPhoto' + n).classList.remove('hidden'); });
     document.getElementById('previewVideoBadge').classList.add('hidden'); document.getElementById('previewVideoBadge').classList.remove('flex');
@@ -1433,22 +1519,37 @@ function bubble(m, mine) {
     : `<div class="flex justify-start"><div class="bg-white p-3 rounded-2xl rounded-tl-none border border-gray-200 max-w-[80%] text-gray-800 shadow-2xs">${esc(m)}</div></div>`;
 }
 const _openChatModal = openChatModal;
-window.openChatModal = async function (item = null) {
+let chatBuyer = null, chatTimer = null;
+async function loadThread() {
+  if (!sb || !me || !activeChatItem || !chatBuyer) return;
+  const { data, error } = await sb.from('messages').select('*').eq('artwork_key', String(activeChatItem.id)).eq('buyer_id', chatBuyer).order('created_at');
+  const box = document.getElementById('chatThread'); if (error || !data || !box) return;
+  if (box.dataset.n === String(data.length)) return;
+  box.dataset.n = data.length;
+  box.innerHTML = data.map(m => bubble(m.body, m.sender_id === me)).join('') || '<p class="text-center text-[11px] text-gray-400 py-4">첫 메시지를 보내 보세요 👋</p>';
+  const logs = document.getElementById('chatMessages'); logs.scrollTop = logs.scrollHeight;
+}
+window.openChatModal = async function (item = null, buyerId = null) {
   _openChatModal(item);
-  if (!sb || !me) return;
   const it = activeChatItem, logs = document.getElementById('chatMessages');
-  const { data } = await sb.from('messages').select('*').eq('artwork_key', String(it.id)).eq('buyer_id', me).order('created_at');
-  (data || []).forEach(m => logs.insertAdjacentHTML('beforeend', bubble(m.body, m.sender_id === me)));
-  logs.scrollTop = logs.scrollHeight;
+  chatBuyer = buyerId || me;
+  logs.innerHTML = '<div class="bg-amber-50 text-amber-800 p-2.5 rounded-xl border border-amber-200/60 text-[11px] leading-relaxed mb-3">💡 <strong>안전대화 가이드:</strong> 직거래는 밝은 공공장소에서, 택배는 포장 상태 사진을 공유하세요.</div>'
+    + (it.id < 0 ? '<div class="bg-gray-100 text-gray-600 p-2.5 rounded-xl text-[11px] mb-3">샘플 작품이라 실제 작가의 답장은 오지 않아요. 직접 등록한 작품에서 채팅이 연결됩니다.</div>' : '')
+    + '<div id="chatThread" class="space-y-3"></div>';
+  if (buyerId && buyerId !== me) document.getElementById('chatPartnerName').innerText = '구매 문의자';
+  clearInterval(chatTimer);
+  if (sb && me) { await loadThread(); chatTimer = setInterval(loadThread, 4000); }
 };
+const _closeModal = closeModal;
+window.closeModal = function (id) { if (id === 'chatModal') clearInterval(chatTimer); _closeModal(id); };
 window.sendMessage = async function () {
   const input = document.getElementById('chatInput'), text = input.value.trim(); if (!text) return;
-  const logs = document.getElementById('chatMessages');
-  if (!sb || !me) { logs.insertAdjacentHTML('beforeend', bubble(text, true)); input.value = ''; return; }
+  const box = document.getElementById('chatThread');
+  if (!sb || !me) { box.insertAdjacentHTML('beforeend', bubble(text, true)); input.value = ''; document.getElementById('chatMessages').scrollTop = 1e6; return; }
   input.value = '';
-  const { error } = await sb.from('messages').insert({ artwork_key: String(activeChatItem.id), buyer_id: me, sender_id: me, body: text });
+  const { error } = await sb.from('messages').insert({ artwork_key: String(activeChatItem.id), buyer_id: chatBuyer, sender_id: me, body: text });
   if (error) { alert('전송 실패: ' + error.message); input.value = text; return; }
-  logs.insertAdjacentHTML('beforeend', bubble(text, true)); logs.scrollTop = logs.scrollHeight;
+  box.dataset.n = ''; await loadThread();
 };
 const _updateChatTradeStatus = updateChatTradeStatus;
 window.updateChatTradeStatus = function (s) {
@@ -1456,6 +1557,183 @@ window.updateChatTradeStatus = function (s) {
   if (sb && activeChatItem && activeChatItem.db && activeChatItem.isMyUpload)
     sb.from('artworks').update({ trade_status: s }).eq('id', activeChatItem.id).then(r => r.error && console.error(r.error));
 };
+</script>
+<script>
+// ===== 회원가입 / 로그인 / 내 페이지 / 관리자 =====
+let profile = null, authMode = 'login';
+const openM = id => { document.getElementById(id).classList.remove('hidden'); lucide.createIcons(); };
+const won = n => Number(n || 0).toLocaleString() + '원';
+
+async function refreshAuth() {
+  if (sb && me) {
+    const { data: { user } } = await sb.auth.getUser();
+    if (user && !user.is_anonymous) {
+      const { data } = await sb.from('profiles').select('*').eq('id', me).maybeSingle();
+      profile = data || { id: me, name: user.user_metadata?.name || '회원', region: user.user_metadata?.region || '', email: user.email, role: 'user' };
+    }
+  }
+  paintAuthBtn();
+}
+function paintAuthBtn() {
+  document.getElementById('authBtn').textContent = profile ? '로그아웃' : '로그인';
+  document.getElementById('myBtnPhoto').innerHTML = profile ? `<img src="${profile.avatar_url || avatar(profile.name)}" class="w-5 h-5 rounded-full object-cover">` : '';
+  return;
+}
+function _oldPaintAuthBtn() { document.getElementById('authBtn').innerHTML = profile ? `<span class="inline-flex items-center gap-1.5"><img src="${profile.avatar_url || avatar(profile.name)}" class="w-6 h-6 rounded-full object-cover">${esc(profile.name)}</span>` : '로그인'; }
+let authPhoto = null;
+const NOPHOTO = 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#eee"/><circle cx="50" cy="38" r="18" fill="#c9c9c9"/><ellipse cx="50" cy="90" rx="32" ry="24" fill="#c9c9c9"/></svg>');
+function pickAuthPhoto() {
+  const i = document.createElement('input'); i.type = 'file'; i.accept = 'image/*';
+  i.onchange = () => { const f = i.files[0]; if (!f) return; if (f.size > 5 * 1024 * 1024) return alert('사진은 5MB 이하만 가능합니다.'); authPhoto = f; document.getElementById('authPhotoPrev').src = URL.createObjectURL(f); };
+  i.click();
+}
+function onAuthClick() { profile ? doLogout() : openAuth('login'); }
+function openAuth(mode) { authMode = mode; renderAuth(); openM('authModal'); }
+function toggleAuthMode() { authMode = authMode === 'login' ? 'signup' : 'login'; renderAuth(); }
+function renderAuth() {
+  const s = authMode === 'signup'; authPhoto = null; document.getElementById('authPhotoPrev').src = NOPHOTO;
+  document.getElementById('authTitle').textContent = s ? '회원가입' : '로그인';
+  document.getElementById('authSub').textContent = s ? '이름과 사는 곳만 알려주시면 가입 끝!' : '이메일과 비밀번호로 로그인하세요.';
+  document.getElementById('signupOnly').classList.toggle('hidden', !s);
+  document.getElementById('authName').required = s; document.getElementById('authRegion').required = s;
+  document.getElementById('authSubmit').textContent = s ? '가입하기' : '로그인';
+  document.getElementById('authToggle').textContent = s ? '이미 회원이세요? 로그인' : '아직 회원이 아니세요? 회원가입';
+}
+async function submitAuth(e) {
+  e.preventDefault();
+  const v = id => document.getElementById(id).value.trim();
+  if (!sb || !me) { // 미리보기(데모) 모드: 화면 확인용
+    profile = { name: v('authName') || '데모회원', region: v('authRegion') || '서울', email: v('authEmail'), role: 'admin', avatar_url: authPhoto ? URL.createObjectURL(authPhoto) : null, created_at: new Date().toISOString() };
+    closeModal('authModal'); paintAuthBtn(); return;
+  }
+  try {
+    if (authMode === 'signup') {
+      const { data, error } = await sb.auth.signUp({ email: v('authEmail'), password: v('authPw'), options: { data: { name: v('authName'), region: v('authRegion') } } });
+      if (error) throw error;
+      if (!data.session) return alert('가입 완료! 이메일 인증 후 로그인해 주세요.');
+      let avatar_url = null;
+      if (authPhoto) { try { avatar_url = await uploadFile(authPhoto); } catch (pe) { console.error('프로필 사진 업로드 실패', pe); } }
+      const { error: e2 } = await sb.from('profiles').upsert({ id: data.user.id, name: v('authName'), region: v('authRegion'), email: v('authEmail'), avatar_url });
+      if (e2) throw e2;
+    } else {
+      const { error } = await sb.auth.signInWithPassword({ email: v('authEmail'), password: v('authPw') });
+      if (error) throw error;
+    }
+    location.reload();
+  } catch (err) { alert((authMode === 'signup' ? '가입' : '로그인') + ' 실패: ' + (err.message || err)); }
+}
+async function doLogout() { if (sb) await sb.auth.signOut(); profile = null; location.reload(); }
+
+async function openMyPage() {
+  if (!profile) return openAuth('login');
+  const mine = artworks.filter(a => a.isMyUpload), liked = artworks.filter(a => a.isLiked), fol = artists.filter(a => a.following);
+  let chats = 0;
+  if (sb && me) { const r = await sb.from('messages').select('id', { count: 'exact', head: true }).eq('buyer_id', me); chats = r.count || 0; }
+  const row = a => `<li class="flex justify-between gap-2 py-2 border-b border-gray-100 text-sm"><span class="truncate">${esc(a.title)}</span><span class="shrink-0 text-gray-500">${won(a.price)} · ${esc(a.tradeStatus || '판매중')}</span></li>`;
+  document.getElementById('myPageBody').innerHTML = `
+    <h3 class="logo-font text-2xl text-carrot-500">내 페이지</h3>
+    <div class="mt-3 p-3 bg-studio-50 rounded-xl text-sm flex items-center gap-3"><img src="${profile.avatar_url || avatar(profile.name)}" class="w-12 h-12 rounded-full object-cover"><div><b>${esc(profile.name)}</b> <span class="text-gray-500">· ${esc(profile.region || '')}</span><div class="text-xs text-gray-500">${esc(profile.email || '')}</div></div></div>
+    <div class="grid grid-cols-4 gap-2 my-4 text-center text-xs">
+      ${[['등록작품', mine.length], ['찜한작품', liked.length], ['팔로잉', fol.length], ['문의내역', chats]].map(x => `<div class="bg-carrot-50 rounded-xl py-3"><div class="text-lg font-extrabold text-carrot-600">${x[1]}</div>${x[0]}</div>`).join('')}
+    </div>
+    <h4 class="font-bold text-sm mb-1">내 등록 작품</h4><ul class="mb-4">${mine.map(row).join('') || '<li class="text-xs text-gray-400 py-2">등록한 작품이 없습니다.</li>'}</ul>
+    <h4 class="font-bold text-sm mb-1">찜한 작품</h4><ul class="mb-4">${liked.map(row).join('') || '<li class="text-xs text-gray-400 py-2">찜한 작품이 없습니다.</li>'}</ul>
+    <h4 class="font-bold text-sm mb-1">채팅 내역</h4><ul id="inboxList" class="mb-4"><li class="text-xs text-gray-400 py-2">불러오는 중...</li></ul>
+    <div class="flex gap-2">${profile.role === 'admin' ? '<button onclick="closeModal(\'myPageModal\');openAdmin()" class="flex-1 py-2.5 rounded-xl bg-studio-900 text-white text-sm font-bold">관리자 페이지</button>' : ''}
+    <button onclick="doLogout()" class="flex-1 py-2.5 rounded-xl border border-gray-300 text-sm font-bold">로그아웃</button></div>`;
+  openM('myPageModal'); loadInbox();
+}
+const demoMembers = [];
+async function adminAddMember() {
+  const v = id => document.getElementById(id).value.trim();
+  const m = { name: v('admName'), region: v('admRegion'), email: v('admEmail') }, pw = v('admPw');
+  if (!m.name || !m.email || pw.length < 6) return alert('이름, 이메일, 6자 이상의 임시 비밀번호를 입력해 주세요.');
+  if (!sb || !me) { demoMembers.push({ ...m, created_at: new Date().toISOString() }); alert('(데모) 회원이 추가되었습니다.'); return openAdmin(); }
+  try { // 관리자 로그인을 유지하기 위해 별도 임시 클라이언트로 가입시킨다
+    const tmp = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: false, autoRefreshToken: false, storageKey: 'tmp-admin-add' } });
+    const { data, error } = await tmp.auth.signUp({ email: m.email, password: pw, options: { data: { name: m.name, region: m.region } } });
+    if (error) throw error;
+    if (!data.session) return alert('가입은 되었지만 이메일 인증이 필요한 설정입니다. Supabase에서 Confirm email을 꺼 주세요.');
+    const { error: e2 } = await tmp.from('profiles').upsert({ id: data.user.id, name: m.name, region: m.region, email: m.email });
+    if (e2) throw e2;
+    alert('회원이 추가되었습니다.'); openAdmin();
+  } catch (err) { alert('회원 추가 실패: ' + (err.message || err)); }
+}
+async function openAdmin() {
+  let members = [];
+  if (sb && me) { const { data, error } = await sb.from('profiles').select('*').order('created_at', { ascending: false }); if (error) return alert('관리자 권한이 필요합니다.'); members = data || []; }
+  else members = [profile, ...demoMembers];
+  const week = Date.now() - 7 * 864e5, byRegion = {};
+  members.forEach(m => { const r = (m.region || '미입력').split(' ')[0]; byRegion[r] = (byRegion[r] || 0) + 1; });
+  const works = artworks.filter(a => a.db || a.isMyUpload).length;
+  document.getElementById('adminBody').innerHTML = `
+    <h3 class="logo-font text-2xl text-carrot-500">관리자 페이지</h3>
+    <div class="grid grid-cols-3 gap-2 my-4 text-center text-xs">
+      ${[['전체 회원', members.length], ['최근 7일 가입', members.filter(m => new Date(m.created_at) > week).length], ['등록 작품', works]].map(x => `<div class="bg-studio-50 rounded-xl py-3"><div class="text-xl font-extrabold">${x[1]}</div>${x[0]}</div>`).join('')}
+    </div>
+    <div class="flex flex-wrap gap-1.5 mb-4">${Object.entries(byRegion).map(([k, n]) => `<span class="text-[11px] bg-carrot-50 text-carrot-700 px-2 py-1 rounded-full">${esc(k)} ${n}</span>`).join('')}</div>
+    <div class="p-3 mb-4 rounded-xl border border-carrot-200 bg-carrot-50/50"><div class="font-bold text-sm mb-2">회원 추가</div>
+      <div class="grid grid-cols-2 gap-2"><input id="admName" placeholder="이름" class="px-3 py-2 border border-gray-300 rounded-xl outline-none"><input id="admRegion" placeholder="사는 곳" class="px-3 py-2 border border-gray-300 rounded-xl outline-none">
+      <input id="admEmail" type="email" placeholder="이메일" class="px-3 py-2 border border-gray-300 rounded-xl outline-none"><input id="admPw" type="text" placeholder="임시 비밀번호 (6자 이상)" class="px-3 py-2 border border-gray-300 rounded-xl outline-none"></div>
+      <button onclick="adminAddMember()" class="mt-2 w-full bg-carrot-500 hover:bg-carrot-600 text-white font-bold py-2.5 rounded-xl text-sm">회원 추가하기</button></div>
+    <div class="overflow-x-auto"><table class="w-full text-xs"><thead><tr class="text-left text-gray-500 border-b"><th class="py-2">이름</th><th>사는 곳</th><th>이메일</th><th>가입일</th></tr></thead>
+    <tbody>${members.map(m => `<tr class="border-b border-gray-100"><td class="py-2 font-semibold">${esc(m.name)}</td><td>${esc(m.region || '')}</td><td>${esc(m.email || '')}</td><td>${m.created_at ? new Date(m.created_at).toLocaleDateString('ko-KR') : '-'}</td></tr>`).join('')}</tbody></table></div>`;
+  openM('adminModal');
+}
+
+// 기존 함수 연결
+const _onload2 = window.onload;
+window.onload = async function () { await _onload2(); await refreshAuth(); };
+const _openUpload = openUploadModal;
+window.openUploadModal = function () { if (!profile) { alert('작품 등록은 로그인 후 이용할 수 있어요.'); return openAuth('login'); } _openUpload(); };
+const _hus2 = window.handleUploadSubmit;
+window.handleUploadSubmit = function (e) {
+  if (!picked.photo1) { e.preventDefault(); return alert('대표 사진(사진 1)을 올려주세요.'); }
+  if (!sb || !me) { uploadedMockPhoto1 = URL.createObjectURL(picked.photo1); if (picked.photo2) uploadedMockPhoto2 = URL.createObjectURL(picked.photo2); }
+  return _hus2(e);
+};
+</script>
+
+<script>
+// ===== 채팅 내역 / 상세 화면 보강 =====
+async function loadInbox() {
+  const ul = document.getElementById('inboxList'); if (!ul) return;
+  if (!sb || !me) { ul.innerHTML = '<li class="text-xs text-gray-400 py-2">채팅 내역이 없습니다.</li>'; return; }
+  const mineKeys = artworks.filter(a => a.isMyUpload && a.db).map(a => String(a.id));
+  const q1 = sb.from('messages').select('*').eq('buyer_id', me).order('created_at', { ascending: false });
+  const q2 = mineKeys.length ? sb.from('messages').select('*').in('artwork_key', mineKeys).order('created_at', { ascending: false }) : Promise.resolve({ data: [] });
+  const [r1, r2] = await Promise.all([q1, q2]);
+  const seen = {}, rows = [];
+  [...(r1.data || []), ...(r2.data || [])].sort((a, b) => b.created_at.localeCompare(a.created_at)).forEach(m => {
+    const k = m.artwork_key + '|' + m.buyer_id; if (seen[k]) return; seen[k] = 1; rows.push(m); });
+  ul.innerHTML = rows.map(m => {
+    const it = artworks.find(a => String(a.id) === m.artwork_key); if (!it) return '';
+    const mineWork = it.isMyUpload;
+    return `<li class="py-2 border-b border-gray-100 text-sm cursor-pointer" onclick="closeModal('myPageModal');openChatModal(artworks.find(a=>String(a.id)==='${m.artwork_key}'),'${m.buyer_id}')"><div class="flex justify-between gap-2"><b class="truncate">${esc(it.title)}</b><span class="text-[10px] shrink-0 ${mineWork ? 'text-carrot-600' : 'text-gray-400'}">${mineWork ? '받은 문의' : '보낸 문의'}</span></div><div class="text-xs text-gray-500 truncate">${esc(m.body)}</div></li>`; }).join('') || '<li class="text-xs text-gray-400 py-2">채팅 내역이 없습니다.</li>';
+}
+const _odm = openDetailModal;
+window.openDetailModal = function (id) {
+  _odm(id);
+  const it = artworks.find(a => a.id === id); if (!it) return;
+  const b = document.getElementById('startChatBtn'), label = b.querySelector('span');
+  if (it.isMyUpload) { label.textContent = '받은 문의 보기'; b.onclick = () => { closeModal('detailModal'); openMyPage(); }; return; }
+  label.textContent = it.priceOffer ? '작가와 대화 · 가격 제안하기' : '작가와 1:1 대화하기';
+  b.onclick = () => { closeModal('detailModal'); if (!profile) { alert('채팅은 로그인 후 이용할 수 있어요.'); return openAuth('login'); } openChatModal(it); };
+};
+const _openUpload2 = window.openUploadModal;
+window.openUploadModal = function () { _openUpload2(); const f = document.getElementById('uploadArtist'); if (profile && f && !f.value) f.value = profile.name; };
+</script>
+<script>
+// ===== 안전장치: 아이콘 오류 무시 / 오류 알림 / 카드 클릭 보강 =====
+(function () {
+  try { const ci = lucide.createIcons.bind(lucide); lucide.createIcons = function () { try { ci.apply(null, arguments); } catch (e) { console.warn('icon', e); } }; } catch (e) {}
+  window.toast = function (msg) { const d = document.createElement('div'); d.textContent = msg; d.style.cssText = 'position:fixed;left:12px;right:12px;bottom:84px;z-index:9999;background:#1c1917;color:#fff;padding:10px 14px;border-radius:12px;font-size:13px;opacity:.95'; document.body.appendChild(d); setTimeout(() => d.remove(), 4000); };
+  window.addEventListener('error', ev => { if (ev.message && !/ResizeObserver/.test(ev.message)) toast('오류: ' + ev.message); });
+  document.addEventListener('click', e => {
+    const c = e.target.closest('#artworkGrid > div[data-art]'); if (!c || e.target.closest('button')) return;
+    setTimeout(() => { if (document.getElementById('detailModal').classList.contains('hidden')) { try { openDetailModal(Number(c.dataset.art)); } catch (err) { toast('상세 열기 오류: ' + err.message); } } }, 0);
+  });
+})();
 </script>
 </body>
 </html>
